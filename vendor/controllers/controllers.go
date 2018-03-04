@@ -3,6 +3,7 @@ package controllers
 import (
 	"router"
 	"net/http"
+	"github.com/rs/cors"
 	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/relay"
 	"encoding/json"
@@ -12,8 +13,17 @@ import (
 func Load(schema *graphql.Schema) {
 
 	if schema != nil {
+
+		c := cors.New(cors.Options{
+			AllowedOrigins: []string{"http://localhost:4200"}, // client hosting
+			AllowCredentials: true,
+		})
+
 		router.Get("/", GraphIql)
 		router.PostHandler("/query", &relay.Handler{Schema: schema})
+
+		router.Options("/graphql", AllowCors)
+		router.PostHandler("/graphql", c.Handler(&relay.Handler{Schema: schema}))        // cors only for dev
 	} else {
 		router.Get("/", Welcome)
 	}
@@ -28,6 +38,14 @@ func GraphIql(w http.ResponseWriter, req *http.Request) {
 	w.Write(page)
 }
 
+func AllowCors(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,DELETE")
+	w.Header().Set("Access-Control-Allow-Headers",
+		"Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, " +
+			"Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+}
 
 var page = []byte(`
 <!DOCTYPE html>
