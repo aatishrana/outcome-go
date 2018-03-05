@@ -6,16 +6,21 @@ import (
 )
 
 type User struct {
-	Id        uint    `gorm:"column:id" json:"id,omitempty"`
-	FirstName string  `gorm:"column:first_name" json:"first_name,omitempty"`
-	LastName  string  `gorm:"column:last_name" json:"last_name,omitempty"`
-	Email     string  `gorm:"column:email" json:"email,omitempty"`
-	Password  string  `gorm:"column:password" json:"password,omitempty"`
-	Token     string  `gorm:"column:token" json:"token,omitempty"`
-	OrgId     uint    `gorm:"column:org_id" json:"org_id,omitempty"`
-	Team      Team    `gorm:"ForeignKey:user_id;AssociationForeignKey:id" json:"Team,omitempty"`
-	Product   Product `gorm:"ForeignKey:user_id;AssociationForeignKey:id" json:"Product,omitempty"`
-	Org       Org     `gorm:"ForeignKey:OrgId" json:"Org,omitempty"`
+	Id              uint             `gorm:"column:id" json:"id,omitempty"`
+	FirstName       string           `gorm:"column:first_name" json:"first_name,omitempty"`
+	LastName        string           `gorm:"column:last_name" json:"last_name,omitempty"`
+	Email           string           `gorm:"column:email" json:"email,omitempty"`
+	Password        string           `gorm:"column:password" json:"password,omitempty"`
+	Token           string           `gorm:"column:token" json:"token,omitempty"`
+	OrgId           uint             `gorm:"column:org_id" json:"org_id,omitempty"`
+	Teams           []Team           `json:"Teams,omitempty"`
+	UserTeams       []UserTeam       `gorm:"ForeignKey:user_id;AssociationForeignKey:id" json:"UserTeams,omitempty"`
+	Team            Team             `gorm:"ForeignKey:user_id;AssociationForeignKey:id" json:"Team,omitempty"`
+	Product         Product          `gorm:"ForeignKey:user_id;AssociationForeignKey:id" json:"Product,omitempty"`
+	ProductBackLogs []ProductBackLog `gorm:"ForeignKey:user_id;AssociationForeignKey:id" json:"ProductBackLogs,omitempty"`
+	Project         Project          `gorm:"ForeignKey:user_id;AssociationForeignKey:id" json:"Project,omitempty"`
+	Tasks           []Task           `gorm:"ForeignKey:user_id;AssociationForeignKey:id" json:"Tasks,omitempty"`
+	Org             Org              `gorm:"ForeignKey:OrgId" json:"Org,omitempty"`
 }
 
 func (User) TableName() string {
@@ -23,10 +28,12 @@ func (User) TableName() string {
 }
 
 // Child entities
-var UserChildren = []string{"Team", "Product"}
+var UserChildren = []string{"Team", "Product", "ProductBackLogs", "Project", "Tasks"}
 
 // Inter entities
-var UserInterRelation = []generator.InterEntity{}
+var UserInterRelation = []generator.InterEntity{
+	generator.InterEntity{TableName: "user_team", StructName: "UserTeam"},
+}
 
 // This method will return a list of all Users
 func GetAllUsers() []User {
@@ -70,6 +77,17 @@ func DeleteUser(ID uint, parent string) bool {
 	}
 	return del
 }
+func GetUsersOfTeam(teamid uint) []User {
+	data := []User{}
+	data2 := []UserTeam{}
+	database.SQL.Debug().Where("team_id = ?", teamid).Find(&data2)
+	var sliceOfId []uint
+	for _, v := range data2 {
+		sliceOfId = append(sliceOfId, v.UserId)
+	}
+	database.SQL.Debug().Where("id IN (?)", sliceOfId).Find(&data)
+	return data
+}
 func GetUserOfTeam(team Team) User {
 	data := User{}
 	database.SQL.Debug().Where("id = ?", team.UserId).Find(&data)
@@ -78,6 +96,21 @@ func GetUserOfTeam(team Team) User {
 func GetUserOfProduct(product Product) User {
 	data := User{}
 	database.SQL.Debug().Where("id = ?", product.UserId).Find(&data)
+	return data
+}
+func GetUserOfProductBackLog(productbacklog ProductBackLog) User {
+	data := User{}
+	database.SQL.Debug().Where("id = ?", productbacklog.UserId).Find(&data)
+	return data
+}
+func GetUserOfProject(project Project) User {
+	data := User{}
+	database.SQL.Debug().Where("id = ?", project.UserId).Find(&data)
+	return data
+}
+func GetUserOfTask(task Task) User {
+	data := User{}
+	database.SQL.Debug().Where("id = ?", task.UserId).Find(&data)
 	return data
 }
 func GetUsersOfOrg(orgid uint) []User {

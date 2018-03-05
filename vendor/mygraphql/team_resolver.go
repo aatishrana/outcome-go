@@ -1,6 +1,8 @@
 package mygraphql
 
 import (
+	database "database"
+	fmt "fmt"
 	graphqlgo "github.com/neelance/graphql-go"
 	models "models"
 	reflect "reflect"
@@ -13,16 +15,19 @@ type team struct {
 	name    string
 	user_id int32
 	org_id  int32
+	project *project
 	org     *org
+	users   []*user
 	user    *user
 }
 
 // Struct for upserting
 type teamInput struct {
-	Id     *graphqlgo.ID
-	Name   string
-	UserId *int32
-	OrgId  *int32
+	Id      *graphqlgo.ID
+	Name    string
+	UserId  *int32
+	OrgId   *int32
+	Project *projectInput
 }
 
 // Struct for response
@@ -53,6 +58,25 @@ func ResolveCreateTeam(args *struct {
 	} else {
 		team = MapTeam(models.PutTeam(ReverseMapTeam(args.Team)))
 	}
+	if team != nil && args.Team.Project != nil {
+		if args.Team.Project.Id == nil {
+			project := ReverseMapProject(args.Team.Project)
+			if project.TeamId != 0 && utils.ConvertId(team.id) != project.TeamId {
+				// todo throw error
+				return &teamResolver{}
+			}
+			project.TeamId = utils.ConvertId(team.id)
+			team.project = MapProject(models.PostProject(project))
+		} else {
+			project := ReverseMapProject(args.Team.Project)
+			if project.TeamId != 0 && utils.ConvertId(team.id) != project.TeamId {
+				// todo throw error
+				return &teamResolver{}
+			}
+			project.TeamId = utils.ConvertId(team.id)
+			team.project = MapProject(models.PutProject(project))
+		}
+	}
 	return &teamResolver{team}
 }
 
@@ -71,6 +95,39 @@ func ResolveDeleteTeam(args struct {
 		response = &count
 		return response
 	}
+	tempID := args.ID
+	if args.CascadeDelete == true {
+		var data models.Team
+		database.SQL.Model(models.Team{}).Preload("Project").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+		if data.Project.Id != 0 {
+			args.ID = utils.UintToGraphId(data.Project.Id)
+			ResolveDeleteProject(args, "")
+			count++
+		}
+
+		del = models.DeleteTeam(utils.ConvertId(tempID), name)
+		count++
+		response = &count
+		return response
+	}
+
+	var flag int
+	var data models.Team
+	database.SQL.Model(models.Team{}).Preload("Project").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+	if data.Project.Id != 0 {
+		flag++
+	}
+
+	if flag == 0 {
+		del = models.DeleteTeam(utils.ConvertId(tempID), name)
+		count++
+		response = &count
+	} else {
+		// show error
+		fmt.Println("Cannot Delete :", tempID)
+		del = false
+		response = &count
+	}
 	return response
 }
 
@@ -87,12 +144,33 @@ func (r *teamResolver) UserId() int32 {
 func (r *teamResolver) OrgId() int32 {
 	return r.team.org_id
 }
+func (r *teamResolver) Project() *projectResolver {
+	if r.team != nil {
+		project := models.GetProjectOfTeam(utils.ConvertId(r.team.id))
+		return &projectResolver{MapProject(project)}
+	}
+	return &projectResolver{r.team.project}
+}
 func (r *teamResolver) Org() *orgResolver {
 	if r.team != nil {
 		org := models.GetOrgOfTeam(ReverseMap2Team(r.team))
 		return &orgResolver{MapOrg(org)}
 	}
 	return &orgResolver{r.team.org}
+}
+func (r *teamResolver) Users() []*userResolver {
+	var users []*userResolver
+	if r.team != nil {
+		user := models.GetUsersOfTeam(utils.ConvertId(r.team.id))
+		for _, value := range user {
+			users = append(users, &userResolver{MapUser(value)})
+		}
+		return users
+	}
+	for _, value := range r.team.users {
+		users = append(users, &userResolver{value})
+	}
+	return users
 }
 func (r *teamResolver) User() *userResolver {
 	if r.team != nil {

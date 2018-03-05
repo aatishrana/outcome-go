@@ -418,8 +418,8 @@
             "IsNull": 1
           },
           {
-            "Name": "assigned_to",
-            "DisplayName": "AssignedTo",
+            "Name": "user_id",
+            "DisplayName": "UserId",
             "Type": 1,
             "Size": 30,
             "IsNull": 1
@@ -456,21 +456,21 @@
             "DisplayName": "Id",
             "Type": 1,
             "Size": 30,
-            "IsNull":1
+            "IsNull": 1
           },
           {
             "Name": "user_id",
             "DisplayName": "UserId",
             "Type": 1,
             "Size": 30,
-            "IsNull":1
+            "IsNull": 1
           },
           {
             "Name": "team_id",
             "DisplayName": "TeamId",
             "Type": 1,
             "Size": 30,
-            "IsNull":1
+            "IsNull": 1
           }
         ]
       },
@@ -483,21 +483,21 @@
             "DisplayName": "Id",
             "Type": 1,
             "Size": 30,
-            "IsNull":1
+            "IsNull": 1
           },
           {
             "Name": "sprint_id",
             "DisplayName": "SprintId",
             "Type": 1,
             "Size": 30,
-            "IsNull":1
+            "IsNull": 1
           },
           {
             "Name": "phase_id",
             "DisplayName": "PhaseId",
             "Type": 1,
             "Size": 30,
-            "IsNull":1
+            "IsNull": 1
           }
         ]
       }
@@ -546,32 +546,8 @@
       {
         "ParentEntity": "user",
         "ParentEntityField": "id",
-        "ChildEntity": "product_backlog",
+        "ChildEntity": "product_back_log",
         "ChildEntityField": "user_id",
-        "Pivot": "",
-        "Type": 1
-      },
-      {
-        "ParentEntity": "product",
-        "ParentEntityField": "id",
-        "ChildEntity": "product_backlog",
-        "ChildEntityField": "product_id",
-        "Pivot": "",
-        "Type": 2
-      },
-      {
-        "ParentEntity": "product",
-        "ParentEntityField": "id",
-        "ChildEntity": "project",
-        "ChildEntityField": "product_id",
-        "Pivot": "",
-        "Type": 2
-      },
-      {
-        "ParentEntity": "team",
-        "ParentEntityField": "id",
-        "ChildEntity": "project",
-        "ChildEntityField": "team_id",
         "Pivot": "",
         "Type": 2
       },
@@ -584,26 +560,50 @@
         "Type": 1
       },
       {
-        "ParentEntity": "project",
+        "ParentEntity": "user",
         "ParentEntityField": "id",
-        "ChildEntity": "story",
-        "ChildEntityField": "project_id",
+        "ChildEntity": "task",
+        "ChildEntityField": "user_id",
         "Pivot": "",
         "Type": 2
       },
       {
-        "ParentEntity": "product_backlog",
+        "ParentEntity": "team",
         "ParentEntityField": "id",
-        "ChildEntity": "story",
-        "ChildEntityField": "product_back_log_id",
+        "ChildEntity": "project",
+        "ChildEntityField": "team_id",
         "Pivot": "",
         "Type": 1
       },
       {
-        "ParentEntity": "sprint",
+        "ParentEntity": "product",
+        "ParentEntityField": "id",
+        "ChildEntity": "product_back_log",
+        "ChildEntityField": "product_id",
+        "Pivot": "",
+        "Type": 2
+      },
+      {
+        "ParentEntity": "product",
+        "ParentEntityField": "id",
+        "ChildEntity": "project",
+        "ChildEntityField": "product_id",
+        "Pivot": "",
+        "Type": 2
+      },
+      {
+        "ParentEntity": "product_back_log",
         "ParentEntityField": "id",
         "ChildEntity": "story",
-        "ChildEntityField": "sprint_id",
+        "ChildEntityField": "product_back_log_id",
+        "Pivot": "",
+        "Type": 2
+      },
+      {
+        "ParentEntity": "project",
+        "ParentEntityField": "id",
+        "ChildEntity": "story",
+        "ChildEntityField": "project_id",
         "Pivot": "",
         "Type": 2
       },
@@ -612,6 +612,14 @@
         "ParentEntityField": "id",
         "ChildEntity": "sprint",
         "ChildEntityField": "project_id",
+        "Pivot": "",
+        "Type": 2
+      },
+      {
+        "ParentEntity": "sprint",
+        "ParentEntityField": "id",
+        "ChildEntity": "story",
+        "ChildEntityField": "sprint_id",
         "Pivot": "",
         "Type": 2
       },
@@ -634,19 +642,12 @@
       {
         "ParentEntity": "user",
         "ParentEntityField": "id",
-        "ChildEntity": "task",
-        "ChildEntityField": "assigned_to",
-        "Pivot": "",
-        "Type": 1
-      },
-      {
-        "ParentEntity": "user",
-        "ParentEntityField": "id",
         "ChildEntity": "team",
         "ChildEntityField": "id",
         "Pivot": "user_team",
         "Type": 3
-      },{
+      },
+      {
         "ParentEntity": "sprint",
         "ParentEntityField": "id",
         "ChildEntity": "phase",

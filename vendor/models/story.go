@@ -6,13 +6,17 @@ import (
 )
 
 type Story struct {
-	Id               uint   `gorm:"column:id" json:"id,omitempty"`
-	Desc             string `gorm:"column:desc" json:"desc,omitempty"`
-	Status           string `gorm:"column:status" json:"status,omitempty"`
-	Point            uint   `gorm:"column:point" json:"point,omitempty"`
-	ProductBackLogId uint   `gorm:"column:product_back_log_id" json:"product_back_log_id,omitempty"`
-	ProjectId        uint   `gorm:"column:project_id" json:"project_id,omitempty"`
-	SprintId         uint   `gorm:"column:sprint_id" json:"sprint_id,omitempty"`
+	Id               uint           `gorm:"column:id" json:"id,omitempty"`
+	Desc             string         `gorm:"column:desc" json:"desc,omitempty"`
+	Status           string         `gorm:"column:status" json:"status,omitempty"`
+	Point            uint           `gorm:"column:point" json:"point,omitempty"`
+	ProductBackLogId uint           `gorm:"column:product_back_log_id" json:"product_back_log_id,omitempty"`
+	ProjectId        uint           `gorm:"column:project_id" json:"project_id,omitempty"`
+	SprintId         uint           `gorm:"column:sprint_id" json:"sprint_id,omitempty"`
+	Tasks            []Task         `gorm:"ForeignKey:story_id;AssociationForeignKey:id" json:"Tasks,omitempty"`
+	ProductBackLog   ProductBackLog `gorm:"ForeignKey:ProductBackLogId" json:"ProductBackLog,omitempty"`
+	Project          Project        `gorm:"ForeignKey:ProjectId" json:"Project,omitempty"`
+	Sprint           Sprint         `gorm:"ForeignKey:SprintId" json:"Sprint,omitempty"`
 }
 
 func (Story) TableName() string {
@@ -20,7 +24,7 @@ func (Story) TableName() string {
 }
 
 // Child entities
-var StoryChildren = []string{}
+var StoryChildren = []string{"Tasks"}
 
 // Inter entities
 var StoryInterRelation = []generator.InterEntity{}
@@ -66,4 +70,24 @@ func DeleteStory(ID uint, parent string) bool {
 		del = true
 	}
 	return del
+}
+func GetStoryOfTask(task Task) Story {
+	data := Story{}
+	database.SQL.Debug().Where("id = ?", task.StoryId).Find(&data)
+	return data
+}
+func GetStorysOfProductBackLog(productbacklogid uint) []Story {
+	data := ProductBackLog{}
+	database.SQL.Debug().Preload("Storys").Where("id = ?", productbacklogid).Find(&data)
+	return data.Storys
+}
+func GetStorysOfProject(projectid uint) []Story {
+	data := Project{}
+	database.SQL.Debug().Preload("Storys").Where("id = ?", projectid).Find(&data)
+	return data.Storys
+}
+func GetStorysOfSprint(sprintid uint) []Story {
+	data := Sprint{}
+	database.SQL.Debug().Preload("Storys").Where("id = ?", sprintid).Find(&data)
+	return data.Storys
 }

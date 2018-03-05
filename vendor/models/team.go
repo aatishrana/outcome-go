@@ -6,11 +6,13 @@ import (
 )
 
 type Team struct {
-	Id     uint   `gorm:"column:id" json:"id,omitempty"`
-	Name   string `gorm:"column:name" json:"name,omitempty"`
-	UserId uint   `gorm:"column:user_id" json:"user_id,omitempty"`
-	OrgId  uint   `gorm:"column:org_id" json:"org_id,omitempty"`
-	Org    Org    `gorm:"ForeignKey:OrgId" json:"Org,omitempty"`
+	Id      uint    `gorm:"column:id" json:"id,omitempty"`
+	Name    string  `gorm:"column:name" json:"name,omitempty"`
+	UserId  uint    `gorm:"column:user_id" json:"user_id,omitempty"`
+	OrgId   uint    `gorm:"column:org_id" json:"org_id,omitempty"`
+	Project Project `gorm:"ForeignKey:team_id;AssociationForeignKey:id" json:"Project,omitempty"`
+	Org     Org     `gorm:"ForeignKey:OrgId" json:"Org,omitempty"`
+	Users   []User  `json:"Users,omitempty"`
 }
 
 func (Team) TableName() string {
@@ -18,10 +20,12 @@ func (Team) TableName() string {
 }
 
 // Child entities
-var TeamChildren = []string{}
+var TeamChildren = []string{"Project"}
 
 // Inter entities
-var TeamInterRelation = []generator.InterEntity{}
+var TeamInterRelation = []generator.InterEntity{
+	generator.InterEntity{TableName: "user_team", StructName: "UserTeam"},
+}
 
 // This method will return a list of all Teams
 func GetAllTeams() []Team {
@@ -65,10 +69,26 @@ func DeleteTeam(ID uint, parent string) bool {
 	}
 	return del
 }
+func GetTeamOfProject(project Project) Team {
+	data := Team{}
+	database.SQL.Debug().Where("id = ?", project.TeamId).Find(&data)
+	return data
+}
 func GetTeamsOfOrg(orgid uint) []Team {
 	data := Org{}
 	database.SQL.Debug().Preload("Teams").Where("id = ?", orgid).Find(&data)
 	return data.Teams
+}
+func GetTeamsOfUser(userid uint) []Team {
+	data := []Team{}
+	data2 := []UserTeam{}
+	database.SQL.Debug().Where("user_id = ?", userid).Find(&data2)
+	var sliceOfId []uint
+	for _, v := range data2 {
+		sliceOfId = append(sliceOfId, v.TeamId)
+	}
+	database.SQL.Debug().Where("id IN (?)", sliceOfId).Find(&data)
+	return data
 }
 func GetTeamOfUser(userid uint) Team {
 	data := User{}

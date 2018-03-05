@@ -37,6 +37,13 @@ func GetSprintPhase(ID uint) SprintPhase {
 
 // This method will insert one SprintPhase in db
 func PostSprintPhase(data SprintPhase) SprintPhase {
+	var oldData []SprintPhase
+	database.SQL.Find(&oldData)
+	for _, val := range oldData {
+		if val.SprintId == data.SprintId && val.PhaseId == data.PhaseId {
+			return SprintPhase{}
+		}
+	}
 	database.SQL.Create(&data)
 	return data
 }

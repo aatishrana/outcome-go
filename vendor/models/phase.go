@@ -6,8 +6,9 @@ import (
 )
 
 type Phase struct {
-	Id   uint   `gorm:"column:id" json:"id,omitempty"`
-	Name string `gorm:"column:name" json:"name,omitempty"`
+	Id      uint     `gorm:"column:id" json:"id,omitempty"`
+	Name    string   `gorm:"column:name" json:"name,omitempty"`
+	Sprints []Sprint `json:"Sprints,omitempty"`
 }
 
 func (Phase) TableName() string {
@@ -18,7 +19,9 @@ func (Phase) TableName() string {
 var PhaseChildren = []string{}
 
 // Inter entities
-var PhaseInterRelation = []generator.InterEntity{}
+var PhaseInterRelation = []generator.InterEntity{
+	generator.InterEntity{TableName: "sprint_phase", StructName: "SprintPhase"},
+}
 
 // This method will return a list of all Phases
 func GetAllPhases() []Phase {
@@ -61,4 +64,15 @@ func DeletePhase(ID uint, parent string) bool {
 		del = true
 	}
 	return del
+}
+func GetPhasesOfSprint(sprintid uint) []Phase {
+	data := []Phase{}
+	data2 := []SprintPhase{}
+	database.SQL.Debug().Where("sprint_id = ?", sprintid).Find(&data2)
+	var sliceOfId []uint
+	for _, v := range data2 {
+		sliceOfId = append(sliceOfId, v.PhaseId)
+	}
+	database.SQL.Debug().Where("id IN (?)", sliceOfId).Find(&data)
+	return data
 }

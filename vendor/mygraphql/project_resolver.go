@@ -1,6 +1,8 @@
 package mygraphql
 
 import (
+	database "database"
+	fmt "fmt"
 	graphqlgo "github.com/neelance/graphql-go"
 	models "models"
 	reflect "reflect"
@@ -14,6 +16,11 @@ type project struct {
 	user_id    int32
 	team_id    int32
 	product_id int32
+	storys     []*story
+	sprints    []*sprint
+	user       *user
+	team       *team
+	product    *product
 }
 
 // Struct for upserting
@@ -23,6 +30,8 @@ type projectInput struct {
 	UserId    *int32
 	TeamId    *int32
 	ProductId *int32
+	Storys    *[]storyInput
+	Sprints   *[]sprintInput
 }
 
 // Struct for response
@@ -53,6 +62,48 @@ func ResolveCreateProject(args *struct {
 	} else {
 		project = MapProject(models.PutProject(ReverseMapProject(args.Project)))
 	}
+	if project != nil && args.Project.Storys != nil {
+		for _, dev := range *args.Project.Storys {
+			if dev.Id == nil {
+				story := ReverseMapStory(&dev)
+				if story.ProjectId != 0 && utils.ConvertId(project.id) != story.ProjectId {
+					// todo throw error
+					return &projectResolver{}
+				}
+				story.ProjectId = utils.ConvertId(project.id)
+				project.storys = append(project.storys, MapStory(models.PostStory(story)))
+			} else {
+				story := ReverseMapStory(&dev)
+				if story.ProjectId != 0 && utils.ConvertId(project.id) != story.ProjectId {
+					// todo throw error
+					return &projectResolver{}
+				}
+				story.ProjectId = utils.ConvertId(project.id)
+				project.storys = append(project.storys, MapStory(models.PutStory(story)))
+			}
+		}
+	}
+	if project != nil && args.Project.Sprints != nil {
+		for _, dev := range *args.Project.Sprints {
+			if dev.Id == nil {
+				sprint := ReverseMapSprint(&dev)
+				if sprint.ProjectId != 0 && utils.ConvertId(project.id) != sprint.ProjectId {
+					// todo throw error
+					return &projectResolver{}
+				}
+				sprint.ProjectId = utils.ConvertId(project.id)
+				project.sprints = append(project.sprints, MapSprint(models.PostSprint(sprint)))
+			} else {
+				sprint := ReverseMapSprint(&dev)
+				if sprint.ProjectId != 0 && utils.ConvertId(project.id) != sprint.ProjectId {
+					// todo throw error
+					return &projectResolver{}
+				}
+				sprint.ProjectId = utils.ConvertId(project.id)
+				project.sprints = append(project.sprints, MapSprint(models.PutSprint(sprint)))
+			}
+		}
+	}
 	return &projectResolver{project}
 }
 
@@ -70,6 +121,53 @@ func ResolveDeleteProject(args struct {
 		}
 		response = &count
 		return response
+	}
+	tempID := args.ID
+	if args.CascadeDelete == true {
+		var data models.Project
+		database.SQL.Model(models.Project{}).Preload("Storys").Preload("Sprints").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+		for _, v := range data.Storys {
+			args.ID = utils.UintToGraphId(v.Id)
+			ResolveDeleteStory(args, "")
+			count++
+		}
+
+		for _, v := range data.Sprints {
+			args.ID = utils.UintToGraphId(v.Id)
+			ResolveDeleteSprint(args, "")
+			count++
+		}
+
+		del = models.DeleteProject(utils.ConvertId(tempID), name)
+		count++
+		response = &count
+		return response
+	}
+
+	var flag int
+	var data models.Project
+	database.SQL.Model(models.Project{}).Preload("Storys").Preload("Sprints").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+	for _, v := range data.Storys {
+		if v.Id != 0 {
+			flag++
+		}
+	}
+
+	for _, v := range data.Sprints {
+		if v.Id != 0 {
+			flag++
+		}
+	}
+
+	if flag == 0 {
+		del = models.DeleteProject(utils.ConvertId(tempID), name)
+		count++
+		response = &count
+	} else {
+		// show error
+		fmt.Println("Cannot Delete :", tempID)
+		del = false
+		response = &count
 	}
 	return response
 }
@@ -89,6 +187,55 @@ func (r *projectResolver) TeamId() int32 {
 }
 func (r *projectResolver) ProductId() int32 {
 	return r.project.product_id
+}
+func (r *projectResolver) Storys() []*storyResolver {
+	var storys []*storyResolver
+	if r.project != nil {
+		story := models.GetStorysOfProject(utils.ConvertId(r.project.id))
+		for _, value := range story {
+			storys = append(storys, &storyResolver{MapStory(value)})
+		}
+		return storys
+	}
+	for _, value := range r.project.storys {
+		storys = append(storys, &storyResolver{value})
+	}
+	return storys
+}
+func (r *projectResolver) Sprints() []*sprintResolver {
+	var sprints []*sprintResolver
+	if r.project != nil {
+		sprint := models.GetSprintsOfProject(utils.ConvertId(r.project.id))
+		for _, value := range sprint {
+			sprints = append(sprints, &sprintResolver{MapSprint(value)})
+		}
+		return sprints
+	}
+	for _, value := range r.project.sprints {
+		sprints = append(sprints, &sprintResolver{value})
+	}
+	return sprints
+}
+func (r *projectResolver) User() *userResolver {
+	if r.project != nil {
+		user := models.GetUserOfProject(ReverseMap2Project(r.project))
+		return &userResolver{MapUser(user)}
+	}
+	return &userResolver{r.project.user}
+}
+func (r *projectResolver) Team() *teamResolver {
+	if r.project != nil {
+		team := models.GetTeamOfProject(ReverseMap2Project(r.project))
+		return &teamResolver{MapTeam(team)}
+	}
+	return &teamResolver{r.project.team}
+}
+func (r *projectResolver) Product() *productResolver {
+	if r.project != nil {
+		product := models.GetProductOfProject(ReverseMap2Project(r.project))
+		return &productResolver{MapProduct(product)}
+	}
+	return &productResolver{r.project.product}
 }
 
 // Mapper methods

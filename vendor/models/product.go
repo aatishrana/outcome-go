@@ -6,12 +6,14 @@ import (
 )
 
 type Product struct {
-	Id     uint   `gorm:"column:id" json:"id,omitempty"`
-	Name   string `gorm:"column:name" json:"name,omitempty"`
-	Desc   string `gorm:"column:desc" json:"desc,omitempty"`
-	UserId uint   `gorm:"column:user_id" json:"user_id,omitempty"`
-	OrgId  uint   `gorm:"column:org_id" json:"org_id,omitempty"`
-	Org    Org    `gorm:"ForeignKey:OrgId" json:"Org,omitempty"`
+	Id              uint             `gorm:"column:id" json:"id,omitempty"`
+	Name            string           `gorm:"column:name" json:"name,omitempty"`
+	Desc            string           `gorm:"column:desc" json:"desc,omitempty"`
+	UserId          uint             `gorm:"column:user_id" json:"user_id,omitempty"`
+	OrgId           uint             `gorm:"column:org_id" json:"org_id,omitempty"`
+	ProductBackLogs []ProductBackLog `gorm:"ForeignKey:product_id;AssociationForeignKey:id" json:"ProductBackLogs,omitempty"`
+	Projects        []Project        `gorm:"ForeignKey:product_id;AssociationForeignKey:id" json:"Projects,omitempty"`
+	Org             Org              `gorm:"ForeignKey:OrgId" json:"Org,omitempty"`
 }
 
 func (Product) TableName() string {
@@ -19,7 +21,7 @@ func (Product) TableName() string {
 }
 
 // Child entities
-var ProductChildren = []string{}
+var ProductChildren = []string{"ProductBackLogs", "Projects"}
 
 // Inter entities
 var ProductInterRelation = []generator.InterEntity{}
@@ -65,6 +67,16 @@ func DeleteProduct(ID uint, parent string) bool {
 		del = true
 	}
 	return del
+}
+func GetProductOfProductBackLog(productbacklog ProductBackLog) Product {
+	data := Product{}
+	database.SQL.Debug().Where("id = ?", productbacklog.ProductId).Find(&data)
+	return data
+}
+func GetProductOfProject(project Project) Product {
+	data := Product{}
+	database.SQL.Debug().Where("id = ?", project.ProductId).Find(&data)
+	return data
 }
 func GetProductsOfOrg(orgid uint) []Product {
 	data := Org{}

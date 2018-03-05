@@ -1,6 +1,8 @@
 package mygraphql
 
 import (
+	database "database"
+	fmt "fmt"
 	graphqlgo "github.com/neelance/graphql-go"
 	models "models"
 	reflect "reflect"
@@ -15,6 +17,9 @@ type productbacklog struct {
 	priority   string
 	user_id    int32
 	product_id int32
+	storys     []*story
+	user       *user
+	product    *product
 }
 
 // Struct for upserting
@@ -25,6 +30,7 @@ type productbacklogInput struct {
 	Priority  string
 	UserId    *int32
 	ProductId *int32
+	Storys    *[]storyInput
 }
 
 // Struct for response
@@ -55,6 +61,27 @@ func ResolveCreateProductBackLog(args *struct {
 	} else {
 		productbacklog = MapProductBackLog(models.PutProductBackLog(ReverseMapProductBackLog(args.ProductBackLog)))
 	}
+	if productbacklog != nil && args.ProductBackLog.Storys != nil {
+		for _, dev := range *args.ProductBackLog.Storys {
+			if dev.Id == nil {
+				story := ReverseMapStory(&dev)
+				if story.ProductBackLogId != 0 && utils.ConvertId(productbacklog.id) != story.ProductBackLogId {
+					// todo throw error
+					return &productbacklogResolver{}
+				}
+				story.ProductBackLogId = utils.ConvertId(productbacklog.id)
+				productbacklog.storys = append(productbacklog.storys, MapStory(models.PostStory(story)))
+			} else {
+				story := ReverseMapStory(&dev)
+				if story.ProductBackLogId != 0 && utils.ConvertId(productbacklog.id) != story.ProductBackLogId {
+					// todo throw error
+					return &productbacklogResolver{}
+				}
+				story.ProductBackLogId = utils.ConvertId(productbacklog.id)
+				productbacklog.storys = append(productbacklog.storys, MapStory(models.PutStory(story)))
+			}
+		}
+	}
 	return &productbacklogResolver{productbacklog}
 }
 
@@ -72,6 +99,41 @@ func ResolveDeleteProductBackLog(args struct {
 		}
 		response = &count
 		return response
+	}
+	tempID := args.ID
+	if args.CascadeDelete == true {
+		var data models.ProductBackLog
+		database.SQL.Model(models.ProductBackLog{}).Preload("Storys").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+		for _, v := range data.Storys {
+			args.ID = utils.UintToGraphId(v.Id)
+			ResolveDeleteStory(args, "")
+			count++
+		}
+
+		del = models.DeleteProductBackLog(utils.ConvertId(tempID), name)
+		count++
+		response = &count
+		return response
+	}
+
+	var flag int
+	var data models.ProductBackLog
+	database.SQL.Model(models.ProductBackLog{}).Preload("Storys").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+	for _, v := range data.Storys {
+		if v.Id != 0 {
+			flag++
+		}
+	}
+
+	if flag == 0 {
+		del = models.DeleteProductBackLog(utils.ConvertId(tempID), name)
+		count++
+		response = &count
+	} else {
+		// show error
+		fmt.Println("Cannot Delete :", tempID)
+		del = false
+		response = &count
 	}
 	return response
 }
@@ -94,6 +156,34 @@ func (r *productbacklogResolver) UserId() int32 {
 }
 func (r *productbacklogResolver) ProductId() int32 {
 	return r.productbacklog.product_id
+}
+func (r *productbacklogResolver) Storys() []*storyResolver {
+	var storys []*storyResolver
+	if r.productbacklog != nil {
+		story := models.GetStorysOfProductBackLog(utils.ConvertId(r.productbacklog.id))
+		for _, value := range story {
+			storys = append(storys, &storyResolver{MapStory(value)})
+		}
+		return storys
+	}
+	for _, value := range r.productbacklog.storys {
+		storys = append(storys, &storyResolver{value})
+	}
+	return storys
+}
+func (r *productbacklogResolver) User() *userResolver {
+	if r.productbacklog != nil {
+		user := models.GetUserOfProductBackLog(ReverseMap2ProductBackLog(r.productbacklog))
+		return &userResolver{MapUser(user)}
+	}
+	return &userResolver{r.productbacklog.user}
+}
+func (r *productbacklogResolver) Product() *productResolver {
+	if r.productbacklog != nil {
+		product := models.GetProductOfProductBackLog(ReverseMap2ProductBackLog(r.productbacklog))
+		return &productResolver{MapProduct(product)}
+	}
+	return &productResolver{r.productbacklog.product}
 }
 
 // Mapper methods

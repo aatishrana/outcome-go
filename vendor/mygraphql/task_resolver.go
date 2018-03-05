@@ -13,10 +13,13 @@ type task struct {
 	sprint_id       int32
 	story_id        int32
 	sprint_phase_id int32
-	assigned_to     int32
+	user_id         int32
 	point           int32
 	start_dt_tm     string
 	end_dt_tm       string
+	user            *user
+	story           *story
+	sprint          *sprint
 }
 
 // Struct for upserting
@@ -25,7 +28,7 @@ type taskInput struct {
 	SprintId      *int32
 	StoryId       *int32
 	SprintPhaseId *int32
-	AssignedTo    *int32
+	UserId        *int32
 	Point         int32
 	StartDtTm     string
 	EndDtTm       string
@@ -93,8 +96,8 @@ func (r *taskResolver) StoryId() int32 {
 func (r *taskResolver) SprintPhaseId() int32 {
 	return r.task.sprint_phase_id
 }
-func (r *taskResolver) AssignedTo() int32 {
-	return r.task.assigned_to
+func (r *taskResolver) UserId() int32 {
+	return r.task.user_id
 }
 func (r *taskResolver) Point() int32 {
 	return r.task.point
@@ -104,6 +107,27 @@ func (r *taskResolver) StartDtTm() string {
 }
 func (r *taskResolver) EndDtTm() string {
 	return r.task.end_dt_tm
+}
+func (r *taskResolver) User() *userResolver {
+	if r.task != nil {
+		user := models.GetUserOfTask(ReverseMap2Task(r.task))
+		return &userResolver{MapUser(user)}
+	}
+	return &userResolver{r.task.user}
+}
+func (r *taskResolver) Story() *storyResolver {
+	if r.task != nil {
+		story := models.GetStoryOfTask(ReverseMap2Task(r.task))
+		return &storyResolver{MapStory(story)}
+	}
+	return &storyResolver{r.task.story}
+}
+func (r *taskResolver) Sprint() *sprintResolver {
+	if r.task != nil {
+		sprint := models.GetSprintOfTask(ReverseMap2Task(r.task))
+		return &sprintResolver{MapSprint(sprint)}
+	}
+	return &sprintResolver{r.task.sprint}
 }
 
 // Mapper methods
@@ -115,7 +139,6 @@ func MapTask(modelTask models.Task) *task {
 
 	// Create graphql task from models Task
 	task := task{
-		assigned_to:     int32(modelTask.AssignedTo),
 		end_dt_tm:       modelTask.EndDtTm,
 		id:              utils.UintToGraphId(modelTask.Id),
 		point:           int32(modelTask.Point),
@@ -123,6 +146,7 @@ func MapTask(modelTask models.Task) *task {
 		sprint_phase_id: int32(modelTask.SprintPhaseId),
 		start_dt_tm:     modelTask.StartDtTm,
 		story_id:        int32(modelTask.StoryId),
+		user_id:         int32(modelTask.UserId),
 	}
 	return &task
 }
@@ -138,14 +162,12 @@ func ReverseMapTask(mygraphqlTask *taskInput) models.Task {
 	var taskModel models.Task
 	if mygraphqlTask.Id == nil {
 		taskModel = models.Task{
-			AssignedTo: utils.Int32ToUint(*mygraphqlTask.AssignedTo),
-			EndDtTm:    mygraphqlTask.EndDtTm,
-			Point:      utils.Int32ToUint(mygraphqlTask.Point),
-			StartDtTm:  mygraphqlTask.StartDtTm,
+			EndDtTm:   mygraphqlTask.EndDtTm,
+			Point:     utils.Int32ToUint(mygraphqlTask.Point),
+			StartDtTm: mygraphqlTask.StartDtTm,
 		}
 	} else {
 		taskModel = models.Task{
-			AssignedTo:    utils.Int32ToUint(*mygraphqlTask.AssignedTo),
 			EndDtTm:       mygraphqlTask.EndDtTm,
 			Id:            utils.ConvertId(*mygraphqlTask.Id),
 			Point:         utils.Int32ToUint(mygraphqlTask.Point),
@@ -153,6 +175,7 @@ func ReverseMapTask(mygraphqlTask *taskInput) models.Task {
 			SprintPhaseId: utils.Int32ToUint(*mygraphqlTask.SprintPhaseId),
 			StartDtTm:     mygraphqlTask.StartDtTm,
 			StoryId:       utils.Int32ToUint(*mygraphqlTask.StoryId),
+			UserId:        utils.Int32ToUint(*mygraphqlTask.UserId),
 		}
 	}
 	return taskModel
@@ -165,7 +188,6 @@ func ReverseMap2Task(structTask *task) models.Task {
 
 	// Create graphql task from models Task
 	modelTask := models.Task{
-		AssignedTo:    uint(structTask.assigned_to),
 		EndDtTm:       structTask.end_dt_tm,
 		Id:            utils.ConvertId(structTask.id),
 		Point:         uint(structTask.point),
@@ -173,6 +195,7 @@ func ReverseMap2Task(structTask *task) models.Task {
 		SprintPhaseId: uint(structTask.sprint_phase_id),
 		StartDtTm:     structTask.start_dt_tm,
 		StoryId:       uint(structTask.story_id),
+		UserId:        uint(structTask.user_id),
 	}
 	return modelTask
 }

@@ -11,29 +11,37 @@ import (
 
 // Struct for graphql
 type user struct {
-	id         graphqlgo.ID
-	first_name string
-	last_name  string
-	email      string
-	password   string
-	token      string
-	org_id     int32
-	team       *team
-	product    *product
-	org        *org
+	id              graphqlgo.ID
+	first_name      string
+	last_name       string
+	email           string
+	password        string
+	token           string
+	org_id          int32
+	teams           []*team
+	team            *team
+	product         *product
+	productbacklogs []*productbacklog
+	project         *project
+	tasks           []*task
+	org             *org
 }
 
 // Struct for upserting
 type userInput struct {
-	Id        *graphqlgo.ID
-	FirstName string
-	LastName  string
-	Email     string
-	Password  string
-	Token     string
-	OrgId     *int32
-	Team      *teamInput
-	Product   *productInput
+	Id              *graphqlgo.ID
+	FirstName       string
+	LastName        string
+	Email           string
+	Password        string
+	Token           string
+	OrgId           *int32
+	Teams           *[]teamInput
+	Team            *teamInput
+	Product         *productInput
+	ProductBackLogs *[]productbacklogInput
+	Project         *projectInput
+	Tasks           *[]taskInput
 }
 
 // Struct for response
@@ -63,6 +71,41 @@ func ResolveCreateUser(args *struct {
 		user = MapUser(models.PostUser(ReverseMapUser(args.User)))
 	} else {
 		user = MapUser(models.PutUser(ReverseMapUser(args.User)))
+	}
+	if user != nil && args.User.Teams != nil {
+		for _, dev := range *args.User.Teams {
+			if dev.Id == nil {
+				team := ReverseMapTeam(&dev)
+				user.teams = append(user.teams, MapTeam(models.PostTeam(team)))
+
+				var data = userteamInput{}
+				userteam := ReverseMapUserTeam(&data)
+				userId := utils.ConvertId(user.id)
+				var teamId uint
+				for _, val := range user.teams {
+					teamId = utils.ConvertId(val.id)
+				}
+				userteam.UserId = userId
+				userteam.TeamId = teamId
+				models.PostUserTeam(userteam)
+
+			} else {
+				team := ReverseMapTeam(&dev)
+				user.teams = append(user.teams, MapTeam(models.PutTeam(team)))
+
+				var data = userteamInput{}
+				userteam := ReverseMapUserTeam(&data)
+				userId := utils.ConvertId(user.id)
+				var teamId uint
+				for _, val := range user.teams {
+					teamId = utils.ConvertId(val.id)
+				}
+				userteam.UserId = userId
+				userteam.TeamId = teamId
+				models.PostUserTeam(userteam)
+
+			}
+		}
 	}
 	if user != nil && args.User.Team != nil {
 		if args.User.Team.Id == nil {
@@ -102,6 +145,67 @@ func ResolveCreateUser(args *struct {
 			user.product = MapProduct(models.PutProduct(product))
 		}
 	}
+	if user != nil && args.User.ProductBackLogs != nil {
+		for _, dev := range *args.User.ProductBackLogs {
+			if dev.Id == nil {
+				productbacklog := ReverseMapProductBackLog(&dev)
+				if productbacklog.UserId != 0 && utils.ConvertId(user.id) != productbacklog.UserId {
+					// todo throw error
+					return &userResolver{}
+				}
+				productbacklog.UserId = utils.ConvertId(user.id)
+				user.productbacklogs = append(user.productbacklogs, MapProductBackLog(models.PostProductBackLog(productbacklog)))
+			} else {
+				productbacklog := ReverseMapProductBackLog(&dev)
+				if productbacklog.UserId != 0 && utils.ConvertId(user.id) != productbacklog.UserId {
+					// todo throw error
+					return &userResolver{}
+				}
+				productbacklog.UserId = utils.ConvertId(user.id)
+				user.productbacklogs = append(user.productbacklogs, MapProductBackLog(models.PutProductBackLog(productbacklog)))
+			}
+		}
+	}
+	if user != nil && args.User.Project != nil {
+		if args.User.Project.Id == nil {
+			project := ReverseMapProject(args.User.Project)
+			if project.UserId != 0 && utils.ConvertId(user.id) != project.UserId {
+				// todo throw error
+				return &userResolver{}
+			}
+			project.UserId = utils.ConvertId(user.id)
+			user.project = MapProject(models.PostProject(project))
+		} else {
+			project := ReverseMapProject(args.User.Project)
+			if project.UserId != 0 && utils.ConvertId(user.id) != project.UserId {
+				// todo throw error
+				return &userResolver{}
+			}
+			project.UserId = utils.ConvertId(user.id)
+			user.project = MapProject(models.PutProject(project))
+		}
+	}
+	if user != nil && args.User.Tasks != nil {
+		for _, dev := range *args.User.Tasks {
+			if dev.Id == nil {
+				task := ReverseMapTask(&dev)
+				if task.UserId != 0 && utils.ConvertId(user.id) != task.UserId {
+					// todo throw error
+					return &userResolver{}
+				}
+				task.UserId = utils.ConvertId(user.id)
+				user.tasks = append(user.tasks, MapTask(models.PostTask(task)))
+			} else {
+				task := ReverseMapTask(&dev)
+				if task.UserId != 0 && utils.ConvertId(user.id) != task.UserId {
+					// todo throw error
+					return &userResolver{}
+				}
+				task.UserId = utils.ConvertId(user.id)
+				user.tasks = append(user.tasks, MapTask(models.PutTask(task)))
+			}
+		}
+	}
 	return &userResolver{user}
 }
 
@@ -123,7 +227,13 @@ func ResolveDeleteUser(args struct {
 	tempID := args.ID
 	if args.CascadeDelete == true {
 		var data models.User
-		database.SQL.Model(models.User{}).Preload("Team").Preload("Product").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+		database.SQL.Model(models.User{}).Preload("UserTeams").Preload("Team").Preload("Product").Preload("ProductBackLogs").Preload("Project").Preload("Tasks").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+		for _, v := range data.UserTeams {
+			args.ID = utils.UintToGraphId(v.Id)
+			ResolveDeleteUserTeam(args, "")
+			count++
+		}
+
 		if data.Team.Id != 0 {
 			args.ID = utils.UintToGraphId(data.Team.Id)
 			ResolveDeleteTeam(args, "")
@@ -136,6 +246,24 @@ func ResolveDeleteUser(args struct {
 			count++
 		}
 
+		for _, v := range data.ProductBackLogs {
+			args.ID = utils.UintToGraphId(v.Id)
+			ResolveDeleteProductBackLog(args, "")
+			count++
+		}
+
+		if data.Project.Id != 0 {
+			args.ID = utils.UintToGraphId(data.Project.Id)
+			ResolveDeleteProject(args, "")
+			count++
+		}
+
+		for _, v := range data.Tasks {
+			args.ID = utils.UintToGraphId(v.Id)
+			ResolveDeleteTask(args, "")
+			count++
+		}
+
 		del = models.DeleteUser(utils.ConvertId(tempID), name)
 		count++
 		response = &count
@@ -144,13 +272,35 @@ func ResolveDeleteUser(args struct {
 
 	var flag int
 	var data models.User
-	database.SQL.Model(models.User{}).Preload("Team").Preload("Product").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+	database.SQL.Model(models.User{}).Preload("UserTeams").Preload("Team").Preload("Product").Preload("ProductBackLogs").Preload("Project").Preload("Tasks").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+	for _, v := range data.UserTeams {
+		if v.Id != 0 {
+			flag++
+		}
+	}
+
 	if data.Team.Id != 0 {
 		flag++
 	}
 
 	if data.Product.Id != 0 {
 		flag++
+	}
+
+	for _, v := range data.ProductBackLogs {
+		if v.Id != 0 {
+			flag++
+		}
+	}
+
+	if data.Project.Id != 0 {
+		flag++
+	}
+
+	for _, v := range data.Tasks {
+		if v.Id != 0 {
+			flag++
+		}
 	}
 
 	if flag == 0 {
@@ -188,6 +338,20 @@ func (r *userResolver) Token() string {
 func (r *userResolver) OrgId() int32 {
 	return r.user.org_id
 }
+func (r *userResolver) Teams() []*teamResolver {
+	var teams []*teamResolver
+	if r.user != nil {
+		team := models.GetTeamsOfUser(utils.ConvertId(r.user.id))
+		for _, value := range team {
+			teams = append(teams, &teamResolver{MapTeam(value)})
+		}
+		return teams
+	}
+	for _, value := range r.user.teams {
+		teams = append(teams, &teamResolver{value})
+	}
+	return teams
+}
 func (r *userResolver) Team() *teamResolver {
 	if r.user != nil {
 		team := models.GetTeamOfUser(utils.ConvertId(r.user.id))
@@ -201,6 +365,41 @@ func (r *userResolver) Product() *productResolver {
 		return &productResolver{MapProduct(product)}
 	}
 	return &productResolver{r.user.product}
+}
+func (r *userResolver) ProductBackLogs() []*productbacklogResolver {
+	var productbacklogs []*productbacklogResolver
+	if r.user != nil {
+		productbacklog := models.GetProductBackLogsOfUser(utils.ConvertId(r.user.id))
+		for _, value := range productbacklog {
+			productbacklogs = append(productbacklogs, &productbacklogResolver{MapProductBackLog(value)})
+		}
+		return productbacklogs
+	}
+	for _, value := range r.user.productbacklogs {
+		productbacklogs = append(productbacklogs, &productbacklogResolver{value})
+	}
+	return productbacklogs
+}
+func (r *userResolver) Project() *projectResolver {
+	if r.user != nil {
+		project := models.GetProjectOfUser(utils.ConvertId(r.user.id))
+		return &projectResolver{MapProject(project)}
+	}
+	return &projectResolver{r.user.project}
+}
+func (r *userResolver) Tasks() []*taskResolver {
+	var tasks []*taskResolver
+	if r.user != nil {
+		task := models.GetTasksOfUser(utils.ConvertId(r.user.id))
+		for _, value := range task {
+			tasks = append(tasks, &taskResolver{MapTask(value)})
+		}
+		return tasks
+	}
+	for _, value := range r.user.tasks {
+		tasks = append(tasks, &taskResolver{value})
+	}
+	return tasks
 }
 func (r *userResolver) Org() *orgResolver {
 	if r.user != nil {

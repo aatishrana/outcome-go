@@ -9,8 +9,9 @@ import (
 
 // Struct for graphql
 type phase struct {
-	id   graphqlgo.ID
-	name string
+	id      graphqlgo.ID
+	name    string
+	sprints []*sprint
 }
 
 // Struct for upserting
@@ -74,6 +75,20 @@ func (r *phaseResolver) Id() graphqlgo.ID {
 }
 func (r *phaseResolver) Name() string {
 	return r.phase.name
+}
+func (r *phaseResolver) Sprints() []*sprintResolver {
+	var sprints []*sprintResolver
+	if r.phase != nil {
+		sprint := models.GetSprintsOfPhase(utils.ConvertId(r.phase.id))
+		for _, value := range sprint {
+			sprints = append(sprints, &sprintResolver{MapSprint(value)})
+		}
+		return sprints
+	}
+	for _, value := range r.phase.sprints {
+		sprints = append(sprints, &sprintResolver{value})
+	}
+	return sprints
 }
 
 // Mapper methods

@@ -75,8 +75,12 @@ var Schema = `
  	password: String!
  	token: String!
  	org_id: Int!
+ 	teams:[Team!]!
  	team: Team!
  	product: Product!
+ 	productbacklogs:[ProductBackLog!]!
+ 	project: Project!
+ 	tasks:[Task!]!
  	org: Org!
  }
  input UserInput {
@@ -87,8 +91,12 @@ var Schema = `
  	password: String!
  	token: String!
  	org_id: Int 
+ 	teams: [TeamInput!]
  	team: TeamInput
  	product: ProductInput
+ 	productbacklogs: [ProductBackLogInput!]
+ 	project: ProjectInput
+ 	tasks: [TaskInput!]
  }
 
  type Team {
@@ -96,7 +104,9 @@ var Schema = `
  	name: String!
  	user_id: Int!
  	org_id: Int!
+ 	project: Project!
  	org: Org!
+ 	users: [User!]!
  	user: User!
  }
  input TeamInput {
@@ -104,6 +114,7 @@ var Schema = `
  	name: String!
  	user_id: Int 
  	org_id: Int 
+ 	project: ProjectInput
  }
 
  type Product {
@@ -112,6 +123,8 @@ var Schema = `
  	desc: String!
  	user_id: Int!
  	org_id: Int!
+ 	productbacklogs:[ProductBackLog!]!
+ 	projects:[Project!]!
  	org: Org!
  	user: User!
  }
@@ -121,6 +134,8 @@ var Schema = `
  	desc: String!
  	user_id: Int 
  	org_id: Int 
+ 	productbacklogs: [ProductBackLogInput!]
+ 	projects: [ProjectInput!]
  }
 
  type ProductBackLog {
@@ -130,6 +145,9 @@ var Schema = `
  	priority: String!
  	user_id: Int!
  	product_id: Int!
+ 	storys:[Story!]!
+ 	user: User!
+ 	product: Product!
  }
  input ProductBackLogInput {
  	id: ID 
@@ -138,6 +156,7 @@ var Schema = `
  	priority: String!
  	user_id: Int 
  	product_id: Int 
+ 	storys: [StoryInput!]
  }
 
  type Project {
@@ -146,6 +165,11 @@ var Schema = `
  	user_id: Int!
  	team_id: Int!
  	product_id: Int!
+ 	storys:[Story!]!
+ 	sprints:[Sprint!]!
+ 	user: User!
+ 	team: Team!
+ 	product: Product!
  }
  input ProjectInput {
  	id: ID 
@@ -153,6 +177,8 @@ var Schema = `
  	user_id: Int 
  	team_id: Int 
  	product_id: Int 
+ 	storys: [StoryInput!]
+ 	sprints: [SprintInput!]
  }
 
  type Story {
@@ -163,6 +189,10 @@ var Schema = `
  	product_back_log_id: Int!
  	project_id: Int!
  	sprint_id: Int!
+ 	tasks:[Task!]!
+ 	productbacklog: ProductBackLog!
+ 	project: Project!
+ 	sprint: Sprint!
  }
  input StoryInput {
  	id: ID 
@@ -172,6 +202,7 @@ var Schema = `
  	product_back_log_id: Int 
  	project_id: Int 
  	sprint_id: Int 
+ 	tasks: [TaskInput!]
  }
 
  type Sprint {
@@ -180,6 +211,10 @@ var Schema = `
  	start_dt: String!
  	end_dt: String!
  	project_id: Int!
+ 	storys:[Story!]!
+ 	phases:[Phase!]!
+ 	tasks:[Task!]!
+ 	project: Project!
  }
  input SprintInput {
  	id: ID 
@@ -187,11 +222,15 @@ var Schema = `
  	start_dt: String!
  	end_dt: String!
  	project_id: Int 
+ 	storys: [StoryInput!]
+ 	phases: [PhaseInput!]
+ 	tasks: [TaskInput!]
  }
 
  type Phase {
  	id: ID!
  	name: String!
+ 	sprints: [Sprint!]!
  }
  input PhaseInput {
  	id: ID 
@@ -203,17 +242,20 @@ var Schema = `
  	sprint_id: Int!
  	story_id: Int!
  	sprint_phase_id: Int!
- 	assigned_to: Int!
+ 	user_id: Int!
  	point: Int!
  	start_dt_tm: String!
  	end_dt_tm: String!
+ 	user: User!
+ 	story: Story!
+ 	sprint: Sprint!
  }
  input TaskInput {
  	id: ID 
  	sprint_id: Int 
  	story_id: Int 
  	sprint_phase_id: Int 
- 	assigned_to: Int 
+ 	user_id: Int 
  	point: Int!
  	start_dt_tm: String!
  	end_dt_tm: String!

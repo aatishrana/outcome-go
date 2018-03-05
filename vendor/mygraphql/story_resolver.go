@@ -1,6 +1,8 @@
 package mygraphql
 
 import (
+	database "database"
+	fmt "fmt"
 	graphqlgo "github.com/neelance/graphql-go"
 	models "models"
 	reflect "reflect"
@@ -16,6 +18,10 @@ type story struct {
 	product_back_log_id int32
 	project_id          int32
 	sprint_id           int32
+	tasks               []*task
+	productbacklog      *productbacklog
+	project             *project
+	sprint              *sprint
 }
 
 // Struct for upserting
@@ -27,6 +33,7 @@ type storyInput struct {
 	ProductBackLogId *int32
 	ProjectId        *int32
 	SprintId         *int32
+	Tasks            *[]taskInput
 }
 
 // Struct for response
@@ -57,6 +64,27 @@ func ResolveCreateStory(args *struct {
 	} else {
 		story = MapStory(models.PutStory(ReverseMapStory(args.Story)))
 	}
+	if story != nil && args.Story.Tasks != nil {
+		for _, dev := range *args.Story.Tasks {
+			if dev.Id == nil {
+				task := ReverseMapTask(&dev)
+				if task.StoryId != 0 && utils.ConvertId(story.id) != task.StoryId {
+					// todo throw error
+					return &storyResolver{}
+				}
+				task.StoryId = utils.ConvertId(story.id)
+				story.tasks = append(story.tasks, MapTask(models.PostTask(task)))
+			} else {
+				task := ReverseMapTask(&dev)
+				if task.StoryId != 0 && utils.ConvertId(story.id) != task.StoryId {
+					// todo throw error
+					return &storyResolver{}
+				}
+				task.StoryId = utils.ConvertId(story.id)
+				story.tasks = append(story.tasks, MapTask(models.PutTask(task)))
+			}
+		}
+	}
 	return &storyResolver{story}
 }
 
@@ -74,6 +102,41 @@ func ResolveDeleteStory(args struct {
 		}
 		response = &count
 		return response
+	}
+	tempID := args.ID
+	if args.CascadeDelete == true {
+		var data models.Story
+		database.SQL.Model(models.Story{}).Preload("Tasks").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+		for _, v := range data.Tasks {
+			args.ID = utils.UintToGraphId(v.Id)
+			ResolveDeleteTask(args, "")
+			count++
+		}
+
+		del = models.DeleteStory(utils.ConvertId(tempID), name)
+		count++
+		response = &count
+		return response
+	}
+
+	var flag int
+	var data models.Story
+	database.SQL.Model(models.Story{}).Preload("Tasks").Where("id=?", utils.ConvertId(args.ID)).Find(&data)
+	for _, v := range data.Tasks {
+		if v.Id != 0 {
+			flag++
+		}
+	}
+
+	if flag == 0 {
+		del = models.DeleteStory(utils.ConvertId(tempID), name)
+		count++
+		response = &count
+	} else {
+		// show error
+		fmt.Println("Cannot Delete :", tempID)
+		del = false
+		response = &count
 	}
 	return response
 }
@@ -99,6 +162,41 @@ func (r *storyResolver) ProjectId() int32 {
 }
 func (r *storyResolver) SprintId() int32 {
 	return r.story.sprint_id
+}
+func (r *storyResolver) Tasks() []*taskResolver {
+	var tasks []*taskResolver
+	if r.story != nil {
+		task := models.GetTasksOfStory(utils.ConvertId(r.story.id))
+		for _, value := range task {
+			tasks = append(tasks, &taskResolver{MapTask(value)})
+		}
+		return tasks
+	}
+	for _, value := range r.story.tasks {
+		tasks = append(tasks, &taskResolver{value})
+	}
+	return tasks
+}
+func (r *storyResolver) ProductBackLog() *productbacklogResolver {
+	if r.story != nil {
+		productbacklog := models.GetProductBackLogOfStory(ReverseMap2Story(r.story))
+		return &productbacklogResolver{MapProductBackLog(productbacklog)}
+	}
+	return &productbacklogResolver{r.story.productbacklog}
+}
+func (r *storyResolver) Project() *projectResolver {
+	if r.story != nil {
+		project := models.GetProjectOfStory(ReverseMap2Story(r.story))
+		return &projectResolver{MapProject(project)}
+	}
+	return &projectResolver{r.story.project}
+}
+func (r *storyResolver) Sprint() *sprintResolver {
+	if r.story != nil {
+		sprint := models.GetSprintOfStory(ReverseMap2Story(r.story))
+		return &sprintResolver{MapSprint(sprint)}
+	}
+	return &sprintResolver{r.story.sprint}
 }
 
 // Mapper methods

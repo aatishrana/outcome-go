@@ -6,11 +6,14 @@ import (
 )
 
 type Project struct {
-	Id        uint   `gorm:"column:id" json:"id,omitempty"`
-	Name      string `gorm:"column:name" json:"name,omitempty"`
-	UserId    uint   `gorm:"column:user_id" json:"user_id,omitempty"`
-	TeamId    uint   `gorm:"column:team_id" json:"team_id,omitempty"`
-	ProductId uint   `gorm:"column:product_id" json:"product_id,omitempty"`
+	Id        uint     `gorm:"column:id" json:"id,omitempty"`
+	Name      string   `gorm:"column:name" json:"name,omitempty"`
+	UserId    uint     `gorm:"column:user_id" json:"user_id,omitempty"`
+	TeamId    uint     `gorm:"column:team_id" json:"team_id,omitempty"`
+	ProductId uint     `gorm:"column:product_id" json:"product_id,omitempty"`
+	Storys    []Story  `gorm:"ForeignKey:project_id;AssociationForeignKey:id" json:"Storys,omitempty"`
+	Sprints   []Sprint `gorm:"ForeignKey:project_id;AssociationForeignKey:id" json:"Sprints,omitempty"`
+	Product   Product  `gorm:"ForeignKey:ProductId" json:"Product,omitempty"`
 }
 
 func (Project) TableName() string {
@@ -18,7 +21,7 @@ func (Project) TableName() string {
 }
 
 // Child entities
-var ProjectChildren = []string{}
+var ProjectChildren = []string{"Storys", "Sprints"}
 
 // Inter entities
 var ProjectInterRelation = []generator.InterEntity{}
@@ -64,4 +67,29 @@ func DeleteProject(ID uint, parent string) bool {
 		del = true
 	}
 	return del
+}
+func GetProjectOfStory(story Story) Project {
+	data := Project{}
+	database.SQL.Debug().Where("id = ?", story.ProjectId).Find(&data)
+	return data
+}
+func GetProjectOfSprint(sprint Sprint) Project {
+	data := Project{}
+	database.SQL.Debug().Where("id = ?", sprint.ProjectId).Find(&data)
+	return data
+}
+func GetProjectOfUser(userid uint) Project {
+	data := User{}
+	database.SQL.Debug().Preload("Project").Where("id = ?", userid).Find(&data)
+	return data.Project
+}
+func GetProjectOfTeam(teamid uint) Project {
+	data := Team{}
+	database.SQL.Debug().Preload("Project").Where("id = ?", teamid).Find(&data)
+	return data.Project
+}
+func GetProjectsOfProduct(productid uint) []Project {
+	data := Product{}
+	database.SQL.Debug().Preload("Projects").Where("id = ?", productid).Find(&data)
+	return data.Projects
 }

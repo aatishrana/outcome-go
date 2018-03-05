@@ -10,10 +10,13 @@ type Task struct {
 	SprintId      uint   `gorm:"column:sprint_id" json:"sprint_id,omitempty"`
 	StoryId       uint   `gorm:"column:story_id" json:"story_id,omitempty"`
 	SprintPhaseId uint   `gorm:"column:sprint_phase_id" json:"sprint_phase_id,omitempty"`
-	AssignedTo    uint   `gorm:"column:assigned_to" json:"assigned_to,omitempty"`
+	UserId        uint   `gorm:"column:user_id" json:"user_id,omitempty"`
 	Point         uint   `gorm:"column:point" json:"point,omitempty"`
 	StartDtTm     string `gorm:"column:start_dt_tm" json:"start_dt_tm,omitempty"`
 	EndDtTm       string `gorm:"column:end_dt_tm" json:"end_dt_tm,omitempty"`
+	User          User   `gorm:"ForeignKey:UserId" json:"User,omitempty"`
+	Story         Story  `gorm:"ForeignKey:StoryId" json:"Story,omitempty"`
+	Sprint        Sprint `gorm:"ForeignKey:SprintId" json:"Sprint,omitempty"`
 }
 
 func (Task) TableName() string {
@@ -67,4 +70,19 @@ func DeleteTask(ID uint, parent string) bool {
 		del = true
 	}
 	return del
+}
+func GetTasksOfUser(userid uint) []Task {
+	data := User{}
+	database.SQL.Debug().Preload("Tasks").Where("id = ?", userid).Find(&data)
+	return data.Tasks
+}
+func GetTasksOfStory(storyid uint) []Task {
+	data := Story{}
+	database.SQL.Debug().Preload("Tasks").Where("id = ?", storyid).Find(&data)
+	return data.Tasks
+}
+func GetTasksOfSprint(sprintid uint) []Task {
+	data := Sprint{}
+	database.SQL.Debug().Preload("Tasks").Where("id = ?", sprintid).Find(&data)
+	return data.Tasks
 }

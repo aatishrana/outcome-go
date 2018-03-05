@@ -37,6 +37,13 @@ func GetUserTeam(ID uint) UserTeam {
 
 // This method will insert one UserTeam in db
 func PostUserTeam(data UserTeam) UserTeam {
+	var oldData []UserTeam
+	database.SQL.Find(&oldData)
+	for _, val := range oldData {
+		if val.UserId == data.UserId && val.TeamId == data.TeamId {
+			return UserTeam{}
+		}
+	}
 	database.SQL.Create(&data)
 	return data
 }
