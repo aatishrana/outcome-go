@@ -17,6 +17,10 @@ func init() {
 	router.Post("/org", PostOrg)
 	router.Put("/org/:id", PutOrg)
 	router.Delete("/org/:id", DeleteOrg)
+
+	router.Get("/org/:id/teams", GetAllOrgTeams)
+	router.Get("/org/:id/users", GetAllOrgUsers)
+	router.Get("/org/:id/products", GetAllOrgProducts)
 }
 func GetAllOrgs(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllOrgs()
@@ -71,6 +75,30 @@ func DeleteOrg(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteOrg(utils.StringToUInt(ID), "")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetAllOrgTeams(w http.ResponseWriter, req *http.Request) {
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetTeamsOfOrg(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetAllOrgUsers(w http.ResponseWriter, req *http.Request) {
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetUsersOfOrg(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetAllOrgProducts(w http.ResponseWriter, req *http.Request) {
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetProductsOfOrg(utils.StringToUInt(ID))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
