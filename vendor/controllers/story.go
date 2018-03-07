@@ -17,6 +17,8 @@ func init() {
 	router.Post("/story", PostStory)
 	router.Put("/story/:id", PutStory)
 	router.Delete("/story/:id", DeleteStory)
+
+	router.Get("/story/:id/tasks", GetStorysAllTasks)
 }
 func GetAllStorys(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllStorys()
@@ -71,6 +73,15 @@ func DeleteStory(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteStory(utils.StringToUInt(ID), "")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetStorysAllTasks(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetTasksOfStory(utils.StringToUInt(ID))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }

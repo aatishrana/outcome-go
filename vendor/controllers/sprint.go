@@ -17,6 +17,9 @@ func init() {
 	router.Post("/sprint", PostSprint)
 	router.Put("/sprint/:id", PutSprint)
 	router.Delete("/sprint/:id", DeleteSprint)
+
+	router.Get("/sprint/:id/stories", GetSprinsAllStories)
+	router.Get("/sprint/:id/tasks", GetSprintsAllTasks)
 }
 func GetAllSprints(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllSprints()
@@ -71,6 +74,24 @@ func DeleteSprint(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteSprint(utils.StringToUInt(ID), "")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetSprinsAllStories(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetStorysOfSprint(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetSprintsAllTasks(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetTasksOfSprint(utils.StringToUInt(ID))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
