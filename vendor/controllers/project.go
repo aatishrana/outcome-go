@@ -17,6 +17,9 @@ func init() {
 	router.Post("/project", PostProject)
 	router.Put("/project/:id", PutProject)
 	router.Delete("/project/:id", DeleteProject)
+
+	router.Get("/project/:id/stories", GetProjectsAllStories)
+	router.Get("/project/:id/sprints", GetProjectsAllSprints)
 }
 func GetAllProjects(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllProjects()
@@ -71,6 +74,24 @@ func DeleteProject(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteProject(utils.StringToUInt(ID), "")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetProjectsAllStories(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetStorysOfProject(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetProjectsAllSprints(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetSprintsOfProject(utils.StringToUInt(ID))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }

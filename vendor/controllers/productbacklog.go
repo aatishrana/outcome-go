@@ -17,6 +17,8 @@ func init() {
 	router.Post("/backlog", PostProductBackLog)
 	router.Put("/backlog/:id", PutProductBackLog)
 	router.Delete("/backlog/:id", DeleteProductBackLog)
+
+	router.Get("/backlog/:id/stories", GetProductBackLogsAllStories)
 }
 func GetAllProductBackLogs(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllProductBackLogs()
@@ -71,6 +73,15 @@ func DeleteProductBackLog(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteProductBackLog(utils.StringToUInt(ID), "")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetProductBackLogsAllStories(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetStorysOfProductBackLog(utils.StringToUInt(ID))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }

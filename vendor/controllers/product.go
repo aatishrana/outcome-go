@@ -17,6 +17,9 @@ func init() {
 	router.Post("/product", PostProduct)
 	router.Put("/product/:id", PutProduct)
 	router.Delete("/product/:id", DeleteProduct)
+
+	router.Get("/product/:id/backlogs", GetProductsAllBacklogs)
+	router.Get("/product/:id/projects", GetProductsAllProjects)
 }
 func GetAllProducts(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllProducts()
@@ -71,6 +74,24 @@ func DeleteProduct(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteProduct(utils.StringToUInt(ID), "")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetProductsAllBacklogs(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetProductBackLogsOfProduct(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetProductsAllProjects(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetProjectsOfProduct(utils.StringToUInt(ID))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
