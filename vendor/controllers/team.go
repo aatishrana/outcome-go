@@ -17,6 +17,8 @@ func init() {
 	router.Post("/team", PostTeam)
 	router.Put("/team/:id", PutTeam)
 	router.Delete("/team/:id", DeleteTeam)
+
+	router.Get("/team/:id/project", GetAllTeamProjects)
 }
 func GetAllTeams(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllTeams()
@@ -71,6 +73,15 @@ func DeleteTeam(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteTeam(utils.StringToUInt(ID), "")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetAllTeamProjects(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetProjectOfTeam(utils.StringToUInt(ID))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }

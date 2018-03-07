@@ -12,11 +12,11 @@ import (
 func init() {
 
 	// Standard routes
-	router.Get("/productbacklog", GetAllProductBackLogs)
-	router.Get("/productbacklog/:id", GetProductBackLog)
-	router.Post("/productbacklog", PostProductBackLog)
-	router.Put("/productbacklog/:id", PutProductBackLog)
-	router.Delete("/productbacklog/:id", DeleteProductBackLog)
+	router.Get("/backlog", GetAllProductBackLogs)
+	router.Get("/backlog/:id", GetProductBackLog)
+	router.Post("/backlog", PostProductBackLog)
+	router.Put("/backlog/:id", PutProductBackLog)
+	router.Delete("/backlog/:id", DeleteProductBackLog)
 }
 func GetAllProductBackLogs(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllProductBackLogs()

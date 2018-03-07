@@ -17,6 +17,13 @@ func init() {
 	router.Post("/user", PostUser)
 	router.Put("/user/:id", PutUser)
 	router.Delete("/user/:id", DeleteUser)
+
+	router.Get("/user/:id/team", GetUserCreatedTeam)
+	router.Get("/user/:id/teams", GetUsersAllTeams)
+	router.Get("/user/:id/product", GetUserCreatedProduct)
+	router.Get("/user/:id/backlogs", GetUsersAllBacklogs)
+	router.Get("/user/:id/project", GetUserCreatedProject)
+	router.Get("/user/:id/tasks", GetUsersAllTasks)
 }
 func GetAllUsers(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllUsers()
@@ -71,6 +78,60 @@ func DeleteUser(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteUser(utils.StringToUInt(ID), "")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetUserCreatedTeam(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetTeamOfUser(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetUsersAllTeams(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetTeamsOfUser(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetUserCreatedProduct(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetProductOfUser(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetUsersAllBacklogs(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetProductBackLogsOfUser(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetUserCreatedProject(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetProjectOfUser(utils.StringToUInt(ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func GetUsersAllTasks(w http.ResponseWriter, req *http.Request) {
+	// Get the parameter id
+	params := router.Params(req)
+	ID := params.ByName("id")
+	data := models.GetTasksOfUser(utils.StringToUInt(ID))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
