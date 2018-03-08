@@ -30,9 +30,9 @@ var TaskChildren = []string{}
 var TaskInterRelation = []generator.InterEntity{}
 
 // This method will return a list of all Tasks
-func GetAllTasks() []Task {
+func GetAllTasks(limit int, offset int) []Task {
 	data := []Task{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

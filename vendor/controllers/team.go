@@ -21,7 +21,7 @@ func init() {
 	router.Get("/team/:id/project", GetAllTeamProjects)
 }
 func GetAllTeams(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllTeams()
+	data := models.GetAllTeams(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

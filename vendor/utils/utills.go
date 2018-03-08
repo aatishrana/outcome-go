@@ -10,9 +10,9 @@ import (
 
 func StringToUInt(ID string) uint {
 
-	if ID == ""{
+	if ID == "" {
 		return 0 //todo handle wrong string
-	}else{
+	} else {
 
 		u64, err := strconv.ParseUint(ID, 10, 32)
 		if err != nil {
@@ -25,11 +25,17 @@ func StringToUInt(ID string) uint {
 
 }
 
+func GetDefaultLimitOffset() (limit int, offset int) {
+	limit = -1	// no limit all records
+	offset = 0	// from the start
+	return
+}
+
 func ConvertId(id graphql.ID) uint {
 
-	if id == ""{
+	if id == "" {
 		return 0
-	}else{
+	} else {
 
 		val := StringToUInt(string(id))
 		return val
@@ -39,9 +45,9 @@ func ConvertId(id graphql.ID) uint {
 
 func UintToGraphId(ID uint) graphql.ID {
 
-	if ID == 0{
+	if ID == 0 {
 		return ""
-	}else{
+	} else {
 		str := fmt.Sprint(ID)
 		return graphql.ID(str)
 
@@ -55,9 +61,9 @@ func RuneToGraphId(ID rune) graphql.ID {
 
 func Int32ToUint(ID int32) uint {
 
-	if ID == 0{
+	if ID == 0 {
 		return 0
-	}else{
+	} else {
 
 		str := fmt.Sprint(ID)
 		str2 := StringToUInt(str)

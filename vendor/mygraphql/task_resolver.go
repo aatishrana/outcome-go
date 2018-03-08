@@ -46,7 +46,7 @@ func ResolveTask(args struct {
 		response = append(response, &taskResolver{task: MapTask(models.GetTask(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllTasks() {
+	for _, val := range models.GetAllTasks(utils.GetDefaultLimitOffset()) {
 		response = append(response, &taskResolver{task: MapTask(val)})
 	}
 	return response

@@ -22,9 +22,9 @@ var SprintPhaseChildren = []string{}
 var SprintPhaseInterRelation = []generator.InterEntity{}
 
 // This method will return a list of all SprintPhases
-func GetAllSprintPhases() []SprintPhase {
+func GetAllSprintPhases(limit int, offset int) []SprintPhase {
 	data := []SprintPhase{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

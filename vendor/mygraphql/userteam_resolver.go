@@ -33,7 +33,7 @@ func ResolveUserTeam(args struct {
 		response = append(response, &userteamResolver{userteam: MapUserTeam(models.GetUserTeam(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllUserTeams() {
+	for _, val := range models.GetAllUserTeams(utils.GetDefaultLimitOffset()) {
 		response = append(response, &userteamResolver{userteam: MapUserTeam(val)})
 	}
 	return response

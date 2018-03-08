@@ -21,7 +21,7 @@ func init() {
 	router.Get("/backlog/:id/stories", GetProductBackLogsAllStories)
 }
 func GetAllProductBackLogs(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllProductBackLogs()
+	data := models.GetAllProductBackLogs(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

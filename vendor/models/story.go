@@ -30,9 +30,9 @@ var StoryChildren = []string{"Tasks"}
 var StoryInterRelation = []generator.InterEntity{}
 
 // This method will return a list of all Storys
-func GetAllStorys() []Story {
+func GetAllStorys(limit int, offset int) []Story {
 	data := []Story{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

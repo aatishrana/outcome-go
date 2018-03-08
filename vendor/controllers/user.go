@@ -26,7 +26,7 @@ func init() {
 	router.Get("/user/:id/tasks", GetUsersAllTasks)
 }
 func GetAllUsers(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllUsers()
+	data := models.GetAllUsers(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

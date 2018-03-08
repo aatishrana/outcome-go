@@ -19,7 +19,7 @@ func init() {
 	router.Delete("/phase/:id", DeletePhase)
 }
 func GetAllPhases(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllPhases()
+	data := models.GetAllPhases(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

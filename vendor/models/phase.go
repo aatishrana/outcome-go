@@ -24,9 +24,9 @@ var PhaseInterRelation = []generator.InterEntity{
 }
 
 // This method will return a list of all Phases
-func GetAllPhases() []Phase {
+func GetAllPhases(limit int, offset int) []Phase {
 	data := []Phase{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

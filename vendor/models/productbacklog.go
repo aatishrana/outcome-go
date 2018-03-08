@@ -28,9 +28,9 @@ var ProductBackLogChildren = []string{"Storys"}
 var ProductBackLogInterRelation = []generator.InterEntity{}
 
 // This method will return a list of all ProductBackLogs
-func GetAllProductBackLogs() []ProductBackLog {
+func GetAllProductBackLogs(limit int, offset int) []ProductBackLog {
 	data := []ProductBackLog{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

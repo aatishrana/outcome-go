@@ -45,7 +45,7 @@ func ResolveProductBackLog(args struct {
 		response = append(response, &productbacklogResolver{productbacklog: MapProductBackLog(models.GetProductBackLog(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllProductBackLogs() {
+	for _, val := range models.GetAllProductBackLogs(utils.GetDefaultLimitOffset()) {
 		response = append(response, &productbacklogResolver{productbacklog: MapProductBackLog(val)})
 	}
 	return response

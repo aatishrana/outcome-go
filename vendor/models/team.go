@@ -28,9 +28,9 @@ var TeamInterRelation = []generator.InterEntity{
 }
 
 // This method will return a list of all Teams
-func GetAllTeams() []Team {
+func GetAllTeams(limit int, offset int) []Team {
 	data := []Team{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

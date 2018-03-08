@@ -19,7 +19,7 @@ func init() {
 	router.Delete("/userteam/:id", DeleteUserTeam)
 }
 func GetAllUserTeams(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllUserTeams()
+	data := models.GetAllUserTeams(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

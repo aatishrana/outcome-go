@@ -42,7 +42,7 @@ func ResolveTeam(args struct {
 		response = append(response, &teamResolver{team: MapTeam(models.GetTeam(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllTeams() {
+	for _, val := range models.GetAllTeams(utils.GetDefaultLimitOffset()) {
 		response = append(response, &teamResolver{team: MapTeam(val)})
 	}
 	return response

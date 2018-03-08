@@ -46,7 +46,7 @@ func ResolveProject(args struct {
 		response = append(response, &projectResolver{project: MapProject(models.GetProject(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllProjects() {
+	for _, val := range models.GetAllProjects(utils.GetDefaultLimitOffset()) {
 		response = append(response, &projectResolver{project: MapProject(val)})
 	}
 	return response

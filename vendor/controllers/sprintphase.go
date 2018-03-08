@@ -19,7 +19,7 @@ func init() {
 	router.Delete("/sprintphase/:id", DeleteSprintPhase)
 }
 func GetAllSprintPhases(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllSprintPhases()
+	data := models.GetAllSprintPhases(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

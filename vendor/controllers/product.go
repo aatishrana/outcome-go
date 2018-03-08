@@ -22,7 +22,7 @@ func init() {
 	router.Get("/product/:id/projects", GetProductsAllProjects)
 }
 func GetAllProducts(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllProducts()
+	data := models.GetAllProducts(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

@@ -22,7 +22,7 @@ func init() {
 	router.Get("/sprint/:id/tasks", GetSprintsAllTasks)
 }
 func GetAllSprints(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllSprints()
+	data := models.GetAllSprints(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

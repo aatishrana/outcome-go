@@ -56,7 +56,7 @@ func ResolveUser(args struct {
 		response = append(response, &userResolver{user: MapUser(models.GetUser(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllUsers() {
+	for _, val := range models.GetAllUsers(utils.GetDefaultLimitOffset()) {
 		response = append(response, &userResolver{user: MapUser(val)})
 	}
 	return response

@@ -5,7 +5,6 @@ import (
 	models "models"
 	http "net/http"
 	router "router"
-	utils "utils"
 )
 
 // Routes related to Org
@@ -23,14 +22,12 @@ func init() {
 	router.Get("/org/:id/products", GetAllOrgProducts)
 }
 func GetAllOrgs(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllOrgs()
+	data := models.GetAllOrgs(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 
 func GetOrg(w http.ResponseWriter, req *http.Request) {
-	params := router.Params(req)
-	ID := params.ByName("id")
-	data := models.GetOrg(utils.StringToUInt(ID))
+	data := models.GetOrg(GetId(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -48,8 +45,6 @@ func PostOrg(w http.ResponseWriter, req *http.Request) {
 }
 
 func PutOrg(w http.ResponseWriter, req *http.Request) {
-	params := router.Params(req)
-	ID := params.ByName("id")
 	decoder := json.NewDecoder(req.Body)
 	var newData models.Org
 	err := decoder.Decode(&newData)
@@ -59,36 +54,28 @@ func PutOrg(w http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	newData.Id = utils.StringToUInt(ID)
+	newData.Id = GetId(w, req)
 	data := models.PutOrg(newData)
 	json.NewEncoder(w).Encode(data)
 }
 
 func DeleteOrg(w http.ResponseWriter, req *http.Request) {
 	// Get the parameter id
-	params := router.Params(req)
-	ID := params.ByName("id")
-	data := models.DeleteOrg(utils.StringToUInt(ID), "")
+	data := models.DeleteOrg(GetId(w, req), "")
 	json.NewEncoder(w).Encode(data)
 }
 
 func GetAllOrgTeams(w http.ResponseWriter, req *http.Request) {
-	params := router.Params(req)
-	ID := params.ByName("id")
-	data := models.GetTeamsOfOrg(utils.StringToUInt(ID))
+	data := models.GetTeamsOfOrg(GetId(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 
 func GetAllOrgUsers(w http.ResponseWriter, req *http.Request) {
-	params := router.Params(req)
-	ID := params.ByName("id")
-	data := models.GetUsersOfOrg(utils.StringToUInt(ID))
+	data := models.GetUsersOfOrg(GetId(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 
 func GetAllOrgProducts(w http.ResponseWriter, req *http.Request) {
-	params := router.Params(req)
-	ID := params.ByName("id")
-	data := models.GetProductsOfOrg(utils.StringToUInt(ID))
+	data := models.GetProductsOfOrg(GetId(w, req))
 	json.NewEncoder(w).Encode(data)
 }

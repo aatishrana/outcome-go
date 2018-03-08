@@ -19,7 +19,7 @@ func init() {
 	router.Delete("/task/:id", DeleteTask)
 }
 func GetAllTasks(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllTasks()
+	data := models.GetAllTasks(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

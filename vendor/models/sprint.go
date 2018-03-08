@@ -31,9 +31,9 @@ var SprintInterRelation = []generator.InterEntity{
 }
 
 // This method will return a list of all Sprints
-func GetAllSprints() []Sprint {
+func GetAllSprints(limit int, offset int) []Sprint {
 	data := []Sprint{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

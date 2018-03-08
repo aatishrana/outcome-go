@@ -48,7 +48,7 @@ func ResolveStory(args struct {
 		response = append(response, &storyResolver{story: MapStory(models.GetStory(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllStorys() {
+	for _, val := range models.GetAllStorys(utils.GetDefaultLimitOffset()) {
 		response = append(response, &storyResolver{story: MapStory(val)})
 	}
 	return response

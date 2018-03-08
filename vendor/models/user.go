@@ -36,9 +36,9 @@ var UserInterRelation = []generator.InterEntity{
 }
 
 // This method will return a list of all Users
-func GetAllUsers() []User {
+func GetAllUsers(limit int, offset int) []User {
 	data := []User{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

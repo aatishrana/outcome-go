@@ -27,9 +27,9 @@ var ProductChildren = []string{"ProductBackLogs", "Projects"}
 var ProductInterRelation = []generator.InterEntity{}
 
 // This method will return a list of all Products
-func GetAllProducts() []Product {
+func GetAllProducts(limit int, offset int) []Product {
 	data := []Product{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

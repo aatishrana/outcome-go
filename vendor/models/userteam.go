@@ -22,9 +22,9 @@ var UserTeamChildren = []string{}
 var UserTeamInterRelation = []generator.InterEntity{}
 
 // This method will return a list of all UserTeams
-func GetAllUserTeams() []UserTeam {
+func GetAllUserTeams(limit int, offset int) []UserTeam {
 	data := []UserTeam{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

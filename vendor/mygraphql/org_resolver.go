@@ -39,7 +39,7 @@ func ResolveOrg(args struct {
 		response = append(response, &orgResolver{org: MapOrg(models.GetOrg(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllOrgs() {
+	for _, val := range models.GetAllOrgs(utils.GetDefaultLimitOffset()) {
 		response = append(response, &orgResolver{org: MapOrg(val)})
 	}
 	return response

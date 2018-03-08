@@ -33,7 +33,7 @@ func ResolveSprintPhase(args struct {
 		response = append(response, &sprintphaseResolver{sprintphase: MapSprintPhase(models.GetSprintPhase(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllSprintPhases() {
+	for _, val := range models.GetAllSprintPhases(utils.GetDefaultLimitOffset()) {
 		response = append(response, &sprintphaseResolver{sprintphase: MapSprintPhase(val)})
 	}
 	return response

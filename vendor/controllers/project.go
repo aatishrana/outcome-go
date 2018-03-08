@@ -22,7 +22,7 @@ func init() {
 	router.Get("/project/:id/sprints", GetProjectsAllSprints)
 }
 func GetAllProjects(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllProjects()
+	data := models.GetAllProjects(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

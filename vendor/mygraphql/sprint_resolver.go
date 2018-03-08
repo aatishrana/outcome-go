@@ -46,7 +46,7 @@ func ResolveSprint(args struct {
 		response = append(response, &sprintResolver{sprint: MapSprint(models.GetSprint(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllSprints() {
+	for _, val := range models.GetAllSprints(utils.GetDefaultLimitOffset()) {
 		response = append(response, &sprintResolver{sprint: MapSprint(val)})
 	}
 	return response

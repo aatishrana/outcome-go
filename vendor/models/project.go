@@ -27,9 +27,9 @@ var ProjectChildren = []string{"Storys", "Sprints"}
 var ProjectInterRelation = []generator.InterEntity{}
 
 // This method will return a list of all Projects
-func GetAllProjects() []Project {
+func GetAllProjects(limit int, offset int) []Project {
 	data := []Project{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

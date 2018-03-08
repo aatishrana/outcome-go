@@ -24,9 +24,9 @@ var OrgChildren = []string{"Users", "Teams", "Products"}
 var OrgInterRelation = []generator.InterEntity{}
 
 // This method will return a list of all Orgs
-func GetAllOrgs() []Org {
+func GetAllOrgs(limit int, offset int) []Org {
 	data := []Org{}
-	database.SQL.Find(&data)
+	database.SQL.Limit(limit).Offset(offset).Find(&data)
 	return data
 }
 

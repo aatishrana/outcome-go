@@ -21,7 +21,7 @@ func init() {
 	router.Get("/story/:id/tasks", GetStorysAllTasks)
 }
 func GetAllStorys(w http.ResponseWriter, req *http.Request) {
-	data := models.GetAllStorys()
+	data := models.GetAllStorys(GetLimitOffset(w, req))
 	json.NewEncoder(w).Encode(data)
 }
 

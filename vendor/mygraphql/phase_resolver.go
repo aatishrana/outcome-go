@@ -32,7 +32,7 @@ func ResolvePhase(args struct {
 		response = append(response, &phaseResolver{phase: MapPhase(models.GetPhase(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllPhases() {
+	for _, val := range models.GetAllPhases(utils.GetDefaultLimitOffset()) {
 		response = append(response, &phaseResolver{phase: MapPhase(val)})
 	}
 	return response

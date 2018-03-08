@@ -7,6 +7,7 @@ import (
 	"github.com/neelance/graphql-go"
 	"github.com/neelance/graphql-go/relay"
 	"encoding/json"
+	"utils"
 )
 
 // Load forces the program to call all the init() funcs in each models file
@@ -15,7 +16,7 @@ func Load(schema *graphql.Schema) {
 	if schema != nil {
 
 		c := cors.New(cors.Options{
-			AllowedOrigins: []string{"http://localhost:4200"}, // client hosting
+			AllowedOrigins:   []string{"http://localhost:4200"}, // client hosting
 			AllowCredentials: true,
 		})
 
@@ -23,7 +24,7 @@ func Load(schema *graphql.Schema) {
 		router.PostHandler("/query", &relay.Handler{Schema: schema})
 
 		router.Options("/graphql", AllowCors)
-		router.PostHandler("/graphql", c.Handler(&relay.Handler{Schema: schema}))        // cors only for dev
+		router.PostHandler("/graphql", c.Handler(&relay.Handler{Schema: schema})) // cors only for dev
 	} else {
 		router.Get("/", Welcome)
 	}
@@ -42,8 +43,39 @@ func AllowCors(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,DELETE")
 	w.Header().Set("Access-Control-Allow-Headers",
-		"Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, " +
+		"Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, "+
 			"Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+}
+
+func GetId(w http.ResponseWriter, req *http.Request) uint {
+	params := router.Params(req)
+	ID := params.ByName("id")
+	id := utils.StringToUInt(ID)
+	if id == 0 {
+		json.NewEncoder(w).Encode("invalid id")
+	}
+	return id
+}
+
+func GetLimitOffset(w http.ResponseWriter, req *http.Request) (limit int, offset int) {
+
+	pageStr := req.URL.Query().Get("page")
+	limitStr := req.URL.Query().Get("limit")
+
+	limit, offset = utils.GetDefaultLimitOffset()
+
+	if limitStr != "" && utils.StringToUInt(limitStr) != 0 {
+		limit = int(utils.StringToUInt(limitStr))
+	} else {
+		limit = 10	// default limit 10
+	}
+
+	if pageStr != "" && utils.StringToUInt(pageStr) != 0 {
+		page := int(utils.StringToUInt(pageStr))
+		offset = (page - 1) * limit
+	}
+
+	return
 }
 
 var page = []byte(`

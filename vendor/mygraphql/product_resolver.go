@@ -45,7 +45,7 @@ func ResolveProduct(args struct {
 		response = append(response, &productResolver{product: MapProduct(models.GetProduct(utils.ConvertId(args.ID)))})
 		return response
 	}
-	for _, val := range models.GetAllProducts() {
+	for _, val := range models.GetAllProducts(utils.GetDefaultLimitOffset()) {
 		response = append(response, &productResolver{product: MapProduct(val)})
 	}
 	return response
