@@ -20,7 +20,6 @@ func init() {
 }
 func GetAllTasks(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllTasks()
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -28,7 +27,6 @@ func GetTask(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.GetTask(utils.StringToUInt(ID))
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -37,13 +35,11 @@ func PostTask(w http.ResponseWriter, req *http.Request) {
 	var data models.Task
 	err := decoder.Decode(&data)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode("invalid data")
 		return
 	}
 	defer req.Body.Close()
 	data = models.PostTask(data)
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -54,7 +50,6 @@ func PutTask(w http.ResponseWriter, req *http.Request) {
 	var newData models.Task
 	err := decoder.Decode(&newData)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode("invalid data")
 		return
 	}
@@ -62,7 +57,6 @@ func PutTask(w http.ResponseWriter, req *http.Request) {
 
 	newData.Id = utils.StringToUInt(ID)
 	data := models.PutTask(newData)
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -71,6 +65,5 @@ func DeleteTask(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteTask(utils.StringToUInt(ID), "")
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }

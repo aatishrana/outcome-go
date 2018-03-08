@@ -11,7 +11,7 @@ import (
 func StringToUInt(ID string) uint {
 
 	if ID == ""{
-		return 0
+		return 0 //todo handle wrong string
 	}else{
 
 		u64, err := strconv.ParseUint(ID, 10, 32)

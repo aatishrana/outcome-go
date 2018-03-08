@@ -22,7 +22,6 @@ func init() {
 }
 func GetAllStorys(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllStorys()
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -30,7 +29,6 @@ func GetStory(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.GetStory(utils.StringToUInt(ID))
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -39,13 +37,11 @@ func PostStory(w http.ResponseWriter, req *http.Request) {
 	var data models.Story
 	err := decoder.Decode(&data)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode("invalid data")
 		return
 	}
 	defer req.Body.Close()
 	data = models.PostStory(data)
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -56,7 +52,6 @@ func PutStory(w http.ResponseWriter, req *http.Request) {
 	var newData models.Story
 	err := decoder.Decode(&newData)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode("invalid data")
 		return
 	}
@@ -64,7 +59,6 @@ func PutStory(w http.ResponseWriter, req *http.Request) {
 
 	newData.Id = utils.StringToUInt(ID)
 	data := models.PutStory(newData)
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -73,7 +67,6 @@ func DeleteStory(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteStory(utils.StringToUInt(ID), "")
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -82,6 +75,5 @@ func GetStorysAllTasks(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.GetTasksOfStory(utils.StringToUInt(ID))
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }

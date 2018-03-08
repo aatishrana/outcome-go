@@ -20,7 +20,6 @@ func init() {
 }
 func GetAllSprintPhases(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllSprintPhases()
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -28,7 +27,6 @@ func GetSprintPhase(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.GetSprintPhase(utils.StringToUInt(ID))
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -37,13 +35,11 @@ func PostSprintPhase(w http.ResponseWriter, req *http.Request) {
 	var data models.SprintPhase
 	err := decoder.Decode(&data)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode("invalid data")
 		return
 	}
 	defer req.Body.Close()
 	data = models.PostSprintPhase(data)
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -54,7 +50,6 @@ func PutSprintPhase(w http.ResponseWriter, req *http.Request) {
 	var newData models.SprintPhase
 	err := decoder.Decode(&newData)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode("invalid data")
 		return
 	}
@@ -62,7 +57,6 @@ func PutSprintPhase(w http.ResponseWriter, req *http.Request) {
 
 	newData.Id = utils.StringToUInt(ID)
 	data := models.PutSprintPhase(newData)
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -71,6 +65,5 @@ func DeleteSprintPhase(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteSprintPhase(utils.StringToUInt(ID), "")
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }

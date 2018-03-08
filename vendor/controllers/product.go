@@ -23,7 +23,6 @@ func init() {
 }
 func GetAllProducts(w http.ResponseWriter, req *http.Request) {
 	data := models.GetAllProducts()
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -31,7 +30,6 @@ func GetProduct(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.GetProduct(utils.StringToUInt(ID))
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -40,13 +38,11 @@ func PostProduct(w http.ResponseWriter, req *http.Request) {
 	var data models.Product
 	err := decoder.Decode(&data)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode("invalid data")
 		return
 	}
 	defer req.Body.Close()
 	data = models.PostProduct(data)
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -57,7 +53,6 @@ func PutProduct(w http.ResponseWriter, req *http.Request) {
 	var newData models.Product
 	err := decoder.Decode(&newData)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode("invalid data")
 		return
 	}
@@ -65,7 +60,6 @@ func PutProduct(w http.ResponseWriter, req *http.Request) {
 
 	newData.Id = utils.StringToUInt(ID)
 	data := models.PutProduct(newData)
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -74,7 +68,6 @@ func DeleteProduct(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.DeleteProduct(utils.StringToUInt(ID), "")
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -83,7 +76,6 @@ func GetProductsAllBacklogs(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.GetProductBackLogsOfProduct(utils.StringToUInt(ID))
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -92,6 +84,5 @@ func GetProductsAllProjects(w http.ResponseWriter, req *http.Request) {
 	params := router.Params(req)
 	ID := params.ByName("id")
 	data := models.GetProjectsOfProduct(utils.StringToUInt(ID))
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
