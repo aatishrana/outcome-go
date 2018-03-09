@@ -3,7 +3,7 @@ package mygraphql
 var Schema = ` 
  schema {
  	query: Query
- 	mutation: Mutation
+ 	# mutation: Mutation
  }
 
  # The query type, represents all of the entry points into our object graph
@@ -38,18 +38,18 @@ var Schema = `
  	upsertUserTeam(userteam: UserTeamInput!) :UserTeam
  	upsertSprintPhase(sprintphase: SprintPhaseInput!) :SprintPhase
  # Delete
- 	deleteOrg(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteUser(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteTeam(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteProduct(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteProductBackLog(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteProject(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteStory(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteSprint(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deletePhase(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteTask(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteUserTeam(id: ID!,cascadeDelete: Boolean!) : Int 
- 	deleteSprintPhase(id: ID!,cascadeDelete: Boolean!) : Int 
+ 	deleteOrg(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteUser(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteTeam(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteProduct(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteProductBackLog(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteProject(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteStory(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteSprint(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deletePhase(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteTask(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteUserTeam(id: ID!,cascadeDelete: Boolean!) : Int
+ 	deleteSprintPhase(id: ID!,cascadeDelete: Boolean!) : Int
  }
 
  type Org {

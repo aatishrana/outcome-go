@@ -4,10 +4,10 @@ import (
 	config "config"
 	controllers "controllers"
 	database "database"
-	//graphqlgo "github.com/neelance/graphql-go"
+	graphqlgo "github.com/neelance/graphql-go"
 	jsonconfig "jsonconfig"
 	models "models"
-	//mygraphql "mygraphql"
+	mygraphql "mygraphql"
 	os "os"
 	route "route"
 	runtime "runtime"
@@ -28,10 +28,10 @@ func main() {
 	database.Connect(conf.Database)
 
 	// Create schema
-	//schema := graphqlgo.MustParseSchema(mygraphql.Schema, &mygraphql.Resolver{})
+	schema := graphqlgo.MustParseSchema(mygraphql.Schema, &mygraphql.Resolver{})
 
 	// Load the controller routes
-	controllers.Load(nil)
+	controllers.Load(schema)
 
 	// Auto migrate all models
 	database.SQL.AutoMigrate(&models.Org{}, &models.User{}, &models.Team{}, &models.Product{}, &models.ProductBackLog{}, &models.Project{}, &models.Story{}, &models.Sprint{}, &models.Phase{}, &models.Task{}, &models.UserTeam{}, &models.SprintPhase{})
