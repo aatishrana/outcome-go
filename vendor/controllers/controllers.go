@@ -23,8 +23,8 @@ func Load(schema *graphql.Schema) {
 		router.Get("/", GraphIql)
 		router.PostHandler("/query", &relay.Handler{Schema: schema})
 
-		router.Options("/graphql", AllowCors)
-		router.PostHandler("/graphql", c.Handler(&relay.Handler{Schema: schema})) // cors only for dev
+		router.Options("/dev", AllowCors)
+		router.PostHandler("/dev", c.Handler(&relay.Handler{Schema: schema})) // cors only for dev
 	} else {
 		router.Get("/", Welcome)
 	}
