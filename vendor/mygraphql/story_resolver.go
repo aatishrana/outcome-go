@@ -27,9 +27,9 @@ type story struct {
 // Struct for upserting
 type storyInput struct {
 	Id               *graphqlgo.ID
-	Desc             string
-	Status           string
-	Point            int32
+	Desc             *string
+	Status           *string
+	Point            *int32
 	ProductBackLogId *int32
 	ProjectId        *int32
 	SprintId         *int32
@@ -225,27 +225,45 @@ func ReverseMapStory(mygraphqlStory *storyInput) models.Story {
 	if reflect.DeepEqual(mygraphqlStory, storyInput{}) {
 		return models.Story{}
 	}
+	var id uint = 0
+	var projectId uint = 0
+	var sprintId uint = 0
+	var productBacklogId uint = 0
+	var point uint = 0
+	var status string = ""
+	var desc string = ""
 
-	// Create graphql story from models Story
-	var storyModel models.Story
-	if mygraphqlStory.Id == nil {
-		storyModel = models.Story{
-			Desc:   mygraphqlStory.Desc,
-			Point:  utils.Int32ToUint(mygraphqlStory.Point),
-			Status: mygraphqlStory.Status,
-		}
-	} else {
-		storyModel = models.Story{
-			Desc:             mygraphqlStory.Desc,
-			Id:               utils.ConvertId(*mygraphqlStory.Id),
-			Point:            utils.Int32ToUint(mygraphqlStory.Point),
-			ProductBackLogId: utils.Int32ToUint(*mygraphqlStory.ProductBackLogId),
-			ProjectId:        utils.Int32ToUint(*mygraphqlStory.ProjectId),
-			SprintId:         utils.Int32ToUint(*mygraphqlStory.SprintId),
-			Status:           mygraphqlStory.Status,
-		}
+	if mygraphqlStory.Id != nil {
+		id = utils.ConvertId(*mygraphqlStory.Id)
 	}
-	return storyModel
+	if mygraphqlStory.ProjectId != nil {
+		projectId = utils.Int32ToUint(*mygraphqlStory.ProjectId)
+	}
+	if mygraphqlStory.SprintId != nil {
+		sprintId = utils.Int32ToUint(*mygraphqlStory.SprintId)
+	}
+	if mygraphqlStory.ProductBackLogId != nil {
+		productBacklogId = utils.Int32ToUint(*mygraphqlStory.ProductBackLogId)
+	}
+	if mygraphqlStory.Point != nil {
+		point = utils.Int32ToUint(*mygraphqlStory.Point)
+	}
+	if mygraphqlStory.Status != nil {
+		status = *mygraphqlStory.Status
+	}
+	if mygraphqlStory.Desc != nil {
+		desc = *mygraphqlStory.Desc
+	}
+
+	return models.Story{
+		Id:               id,
+		Point:            point,
+		ProductBackLogId: productBacklogId,
+		ProjectId:        projectId,
+		SprintId:         sprintId,
+		Desc:             desc,
+		Status:           status,
+	}
 }
 func ReverseMap2Story(structStory *story) models.Story {
 

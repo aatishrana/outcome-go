@@ -26,7 +26,7 @@ type project struct {
 // Struct for upserting
 type projectInput struct {
 	Id        *graphqlgo.ID
-	Name      string
+	Name      *string
 	UserId    *int32
 	TeamId    *int32
 	ProductId *int32
@@ -263,20 +263,35 @@ func ReverseMapProject(mygraphqlProject *projectInput) models.Project {
 		return models.Project{}
 	}
 
-	// Create graphql project from models Project
-	var projectModel models.Project
-	if mygraphqlProject.Id == nil {
-		projectModel = models.Project{Name: mygraphqlProject.Name}
-	} else {
-		projectModel = models.Project{
-			Id:        utils.ConvertId(*mygraphqlProject.Id),
-			Name:      mygraphqlProject.Name,
-			ProductId: utils.Int32ToUint(*mygraphqlProject.ProductId),
-			TeamId:    utils.Int32ToUint(*mygraphqlProject.TeamId),
-			UserId:    utils.Int32ToUint(*mygraphqlProject.UserId),
-		}
+	var id uint = 0
+	var teamId uint = 0
+	var userId uint = 0
+	var productId uint = 0
+	var name string = ""
+
+	if mygraphqlProject.Id != nil {
+		id = utils.ConvertId(*mygraphqlProject.Id)
 	}
-	return projectModel
+	if mygraphqlProject.TeamId != nil {
+		teamId = utils.Int32ToUint(*mygraphqlProject.TeamId)
+	}
+	if mygraphqlProject.UserId != nil {
+		userId = utils.Int32ToUint(*mygraphqlProject.UserId)
+	}
+	if mygraphqlProject.ProductId != nil {
+		productId = utils.Int32ToUint(*mygraphqlProject.ProductId)
+	}
+	if mygraphqlProject.Name != nil {
+		name = *mygraphqlProject.Name
+	}
+
+	return models.Project{
+		Id:        id,
+		Name:      name,
+		ProductId: productId,
+		TeamId:    teamId,
+		UserId:    userId,
+	}
 }
 func ReverseMap2Project(structProject *project) models.Project {
 

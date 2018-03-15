@@ -25,9 +25,9 @@ type productbacklog struct {
 // Struct for upserting
 type productbacklogInput struct {
 	Id        *graphqlgo.ID
-	Desc      string
-	TypeCd    string
-	Priority  string
+	Desc      *string
+	TypeCd    *string
+	Priority  *string
 	UserId    *int32
 	ProductId *int32
 	Storys    *[]storyInput
@@ -212,25 +212,40 @@ func ReverseMapProductBackLog(mygraphqlProductBackLog *productbacklogInput) mode
 		return models.ProductBackLog{}
 	}
 
-	// Create graphql productbacklog from models ProductBackLog
-	var productbacklogModel models.ProductBackLog
-	if mygraphqlProductBackLog.Id == nil {
-		productbacklogModel = models.ProductBackLog{
-			Desc:     mygraphqlProductBackLog.Desc,
-			Priority: mygraphqlProductBackLog.Priority,
-			TypeCd:   mygraphqlProductBackLog.TypeCd,
-		}
-	} else {
-		productbacklogModel = models.ProductBackLog{
-			Desc:      mygraphqlProductBackLog.Desc,
-			Id:        utils.ConvertId(*mygraphqlProductBackLog.Id),
-			Priority:  mygraphqlProductBackLog.Priority,
-			ProductId: utils.Int32ToUint(*mygraphqlProductBackLog.ProductId),
-			TypeCd:    mygraphqlProductBackLog.TypeCd,
-			UserId:    utils.Int32ToUint(*mygraphqlProductBackLog.UserId),
-		}
+	var id uint = 0
+	var userId uint = 0
+	var productId uint = 0
+	var desc string = ""
+	var priority string = ""
+	var typeCd string = ""
+
+	if mygraphqlProductBackLog.Id != nil {
+		id = utils.ConvertId(*mygraphqlProductBackLog.Id)
 	}
-	return productbacklogModel
+	if mygraphqlProductBackLog.UserId != nil {
+		userId = utils.Int32ToUint(*mygraphqlProductBackLog.UserId)
+	}
+	if mygraphqlProductBackLog.ProductId != nil {
+		productId = utils.Int32ToUint(*mygraphqlProductBackLog.ProductId)
+	}
+	if mygraphqlProductBackLog.Desc != nil {
+		desc = *mygraphqlProductBackLog.Desc
+	}
+	if mygraphqlProductBackLog.Priority != nil {
+		priority = *mygraphqlProductBackLog.Priority
+	}
+	if mygraphqlProductBackLog.TypeCd != nil {
+		typeCd = *mygraphqlProductBackLog.TypeCd
+	}
+
+	return models.ProductBackLog{
+		Id:        id,
+		Desc:      desc,
+		Priority:  priority,
+		ProductId: productId,
+		TypeCd:    typeCd,
+		UserId:    userId,
+	}
 }
 func ReverseMap2ProductBackLog(structProductBackLog *productbacklog) models.ProductBackLog {
 

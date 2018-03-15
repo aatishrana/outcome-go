@@ -25,9 +25,9 @@ type sprint struct {
 // Struct for upserting
 type sprintInput struct {
 	Id        *graphqlgo.ID
-	Name      string
-	StartDt   string
-	EndDt     string
+	Name      *string
+	StartDt   *string
+	EndDt     *string
 	ProjectId *int32
 	Storys    *[]storyInput
 	Phases    *[]phaseInput
@@ -310,24 +310,35 @@ func ReverseMapSprint(mygraphqlSprint *sprintInput) models.Sprint {
 		return models.Sprint{}
 	}
 
-	// Create graphql sprint from models Sprint
-	var sprintModel models.Sprint
-	if mygraphqlSprint.Id == nil {
-		sprintModel = models.Sprint{
-			EndDt:   mygraphqlSprint.EndDt,
-			Name:    mygraphqlSprint.Name,
-			StartDt: mygraphqlSprint.StartDt,
-		}
-	} else {
-		sprintModel = models.Sprint{
-			EndDt:     mygraphqlSprint.EndDt,
-			Id:        utils.ConvertId(*mygraphqlSprint.Id),
-			Name:      mygraphqlSprint.Name,
-			ProjectId: utils.Int32ToUint(*mygraphqlSprint.ProjectId),
-			StartDt:   mygraphqlSprint.StartDt,
-		}
+	var id uint = 0
+	var projectId uint = 0
+	var name string = ""
+	var startDt string = ""
+	var endDt string = ""
+
+	if mygraphqlSprint.Id != nil {
+		id = utils.ConvertId(*mygraphqlSprint.Id)
 	}
-	return sprintModel
+	if mygraphqlSprint.ProjectId != nil {
+		projectId = utils.Int32ToUint(*mygraphqlSprint.ProjectId)
+	}
+	if mygraphqlSprint.Name != nil {
+		name = *mygraphqlSprint.Name
+	}
+	if mygraphqlSprint.StartDt != nil {
+		startDt = *mygraphqlSprint.StartDt
+	}
+	if mygraphqlSprint.EndDt != nil {
+		endDt = *mygraphqlSprint.EndDt
+	}
+
+	return models.Sprint{
+		Id:        id,
+		Name:      name,
+		ProjectId: projectId,
+		StartDt:   startDt,
+		EndDt:     endDt,
+	}
 }
 func ReverseMap2Sprint(structSprint *sprint) models.Sprint {
 

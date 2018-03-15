@@ -17,7 +17,7 @@ type phase struct {
 // Struct for upserting
 type phaseInput struct {
 	Id   *graphqlgo.ID
-	Name string
+	Name *string
 }
 
 // Struct for response
@@ -113,17 +113,19 @@ func ReverseMapPhase(mygraphqlPhase *phaseInput) models.Phase {
 		return models.Phase{}
 	}
 
-	// Create graphql phase from models Phase
-	var phaseModel models.Phase
-	if mygraphqlPhase.Id == nil {
-		phaseModel = models.Phase{Name: mygraphqlPhase.Name}
-	} else {
-		phaseModel = models.Phase{
-			Id:   utils.ConvertId(*mygraphqlPhase.Id),
-			Name: mygraphqlPhase.Name,
-		}
+	var id uint = 0
+	var name string = ""
+	if mygraphqlPhase.Id != nil {
+		id = utils.ConvertId(*mygraphqlPhase.Id)
 	}
-	return phaseModel
+	if mygraphqlPhase.Name != nil {
+		name = *mygraphqlPhase.Name
+	}
+
+	return models.Phase{
+		Id:   id,
+		Name: name,
+	}
 }
 func ReverseMap2Phase(structPhase *phase) models.Phase {
 

@@ -25,8 +25,8 @@ type product struct {
 // Struct for upserting
 type productInput struct {
 	Id              *graphqlgo.ID
-	Name            string
-	Desc            string
+	Name            *string
+	Desc            *string
 	UserId          *int32
 	OrgId           *int32
 	ProductBackLogs *[]productbacklogInput
@@ -255,23 +255,35 @@ func ReverseMapProduct(mygraphqlProduct *productInput) models.Product {
 		return models.Product{}
 	}
 
-	// Create graphql product from models Product
-	var productModel models.Product
-	if mygraphqlProduct.Id == nil {
-		productModel = models.Product{
-			Desc: mygraphqlProduct.Desc,
-			Name: mygraphqlProduct.Name,
-		}
-	} else {
-		productModel = models.Product{
-			Desc:   mygraphqlProduct.Desc,
-			Id:     utils.ConvertId(*mygraphqlProduct.Id),
-			Name:   mygraphqlProduct.Name,
-			OrgId:  utils.Int32ToUint(*mygraphqlProduct.OrgId),
-			UserId: utils.Int32ToUint(*mygraphqlProduct.UserId),
-		}
+	var id uint = 0
+	var orgId uint = 0
+	var userId uint = 0
+	var name string = ""
+	var desc string = ""
+
+	if mygraphqlProduct.Id != nil {
+		id = utils.ConvertId(*mygraphqlProduct.Id)
 	}
-	return productModel
+	if mygraphqlProduct.OrgId != nil {
+		orgId = utils.Int32ToUint(*mygraphqlProduct.OrgId)
+	}
+	if mygraphqlProduct.UserId != nil {
+		userId = utils.Int32ToUint(*mygraphqlProduct.UserId)
+	}
+	if mygraphqlProduct.Name != nil {
+		name = *mygraphqlProduct.Name
+	}
+	if mygraphqlProduct.Desc != nil {
+		desc = *mygraphqlProduct.Desc
+	}
+
+	return models.Product{
+		Desc:   desc,
+		Id:     id,
+		Name:   name,
+		OrgId:  orgId,
+		UserId: userId,
+	}
 }
 func ReverseMap2Product(structProduct *product) models.Product {
 

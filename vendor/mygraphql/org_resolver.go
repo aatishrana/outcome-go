@@ -21,7 +21,7 @@ type org struct {
 // Struct for upserting
 type orgInput struct {
 	Id       *graphqlgo.ID
-	Name     string
+	Name     *string
 	Users    *[]userInput
 	Teams    *[]teamInput
 	Products *[]productInput
@@ -270,17 +270,20 @@ func ReverseMapOrg(mygraphqlOrg *orgInput) models.Org {
 		return models.Org{}
 	}
 
-	// Create graphql org from models Org
-	var orgModel models.Org
-	if mygraphqlOrg.Id == nil {
-		orgModel = models.Org{Name: mygraphqlOrg.Name}
-	} else {
-		orgModel = models.Org{
-			Id:   utils.ConvertId(*mygraphqlOrg.Id),
-			Name: mygraphqlOrg.Name,
-		}
+	var id uint = 0
+	var name string = ""
+
+	if mygraphqlOrg.Id != nil {
+		id = utils.ConvertId(*mygraphqlOrg.Id)
 	}
-	return orgModel
+	if mygraphqlOrg.Name != nil {
+		name = *mygraphqlOrg.Name
+	}
+
+	return models.Org{
+		Id:   id,
+		Name: name,
+	}
 }
 func ReverseMap2Org(structOrg *org) models.Org {
 

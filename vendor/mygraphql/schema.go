@@ -61,7 +61,7 @@ var Schema = `
  }
  input OrgInput {
  	id: ID 
- 	name: String!
+ 	name: String
  	users: [UserInput!]
  	teams: [TeamInput!]
  	products: [ProductInput!]
@@ -111,7 +111,7 @@ var Schema = `
  }
  input TeamInput {
  	id: ID 
- 	name: String!
+ 	name: String
  	user_id: Int 
  	org_id: Int 
  	project: ProjectInput
@@ -130,8 +130,8 @@ var Schema = `
  }
  input ProductInput {
  	id: ID 
- 	name: String!
- 	desc: String!
+ 	name: String
+ 	desc: String
  	user_id: Int 
  	org_id: Int 
  	productbacklogs: [ProductBackLogInput!]
@@ -151,9 +151,9 @@ var Schema = `
  }
  input ProductBackLogInput {
  	id: ID 
- 	desc: String!
- 	type_cd: String!
- 	priority: String!
+ 	desc: String
+ 	type_cd: String
+ 	priority: String
  	user_id: Int 
  	product_id: Int 
  	storys: [StoryInput!]
@@ -173,7 +173,7 @@ var Schema = `
  }
  input ProjectInput {
  	id: ID 
- 	name: String!
+ 	name: String
  	user_id: Int 
  	team_id: Int 
  	product_id: Int 
@@ -218,9 +218,9 @@ var Schema = `
  }
  input SprintInput {
  	id: ID 
- 	name: String!
- 	start_dt: String!
- 	end_dt: String!
+ 	name: String
+ 	start_dt: String
+ 	end_dt: String
  	project_id: Int 
  	storys: [StoryInput!]
  	phases: [PhaseInput!]
@@ -234,7 +234,7 @@ var Schema = `
  }
  input PhaseInput {
  	id: ID 
- 	name: String!
+ 	name: String
  }
 
  type Task {

@@ -24,7 +24,7 @@ type team struct {
 // Struct for upserting
 type teamInput struct {
 	Id      *graphqlgo.ID
-	Name    string
+	Name    *string
 	UserId  *int32
 	OrgId   *int32
 	Project *projectInput
@@ -204,19 +204,31 @@ func ReverseMapTeam(mygraphqlTeam *teamInput) models.Team {
 		return models.Team{}
 	}
 
-	// Create graphql team from models Team
-	var teamModel models.Team
-	if mygraphqlTeam.Id == nil {
-		teamModel = models.Team{Name: mygraphqlTeam.Name}
-	} else {
-		teamModel = models.Team{
-			Id:     utils.ConvertId(*mygraphqlTeam.Id),
-			Name:   mygraphqlTeam.Name,
-			OrgId:  utils.Int32ToUint(*mygraphqlTeam.OrgId),
-			UserId: utils.Int32ToUint(*mygraphqlTeam.UserId),
-		}
+	var id uint = 0;
+	var orgId uint = 0;
+	var userId uint = 0;
+	var name string = "";
+
+	if mygraphqlTeam.Id != nil {
+		id = utils.ConvertId(*mygraphqlTeam.Id)
 	}
-	return teamModel
+	if mygraphqlTeam.OrgId != nil {
+		orgId = utils.Int32ToUint(*mygraphqlTeam.OrgId)
+	}
+	if mygraphqlTeam.UserId != nil {
+		userId = utils.Int32ToUint(*mygraphqlTeam.UserId)
+	}
+
+	if mygraphqlTeam.Name != nil {
+		name = *mygraphqlTeam.Name
+	}
+
+	return models.Team{
+		Id:     id,
+		Name:   name,
+		OrgId:  orgId,
+		UserId: userId,
+	}
 }
 func ReverseMap2Team(structTeam *team) models.Team {
 
