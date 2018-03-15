@@ -30,11 +30,11 @@ type user struct {
 // Struct for upserting
 type userInput struct {
 	Id              *graphqlgo.ID
-	FirstName       string
-	LastName        string
-	Email           string
-	Password        string
-	Token           string
+	FirstName       *string
+	LastName        *string
+	Email           *string
+	Password        *string
+	Token           *string
 	OrgId           *int32
 	Teams           *[]teamInput
 	Team            *teamInput
@@ -436,28 +436,45 @@ func ReverseMapUser(mygraphqlUser *userInput) models.User {
 		return models.User{}
 	}
 
-	// Create graphql user from models User
-	var userModel models.User
-	if mygraphqlUser.Id == nil {
-		userModel = models.User{
-			Email:     mygraphqlUser.Email,
-			FirstName: mygraphqlUser.FirstName,
-			LastName:  mygraphqlUser.LastName,
-			Password:  mygraphqlUser.Password,
-			Token:     mygraphqlUser.Token,
-		}
-	} else {
-		userModel = models.User{
-			Email:     mygraphqlUser.Email,
-			FirstName: mygraphqlUser.FirstName,
-			Id:        utils.ConvertId(*mygraphqlUser.Id),
-			LastName:  mygraphqlUser.LastName,
-			OrgId:     utils.Int32ToUint(*mygraphqlUser.OrgId),
-			Password:  mygraphqlUser.Password,
-			Token:     mygraphqlUser.Token,
-		}
+	var id uint = 0;
+	var orgId uint = 0;
+	email := "";
+	firstName := "";
+	lastName := "";
+	password := "";
+	token := "";
+
+	if mygraphqlUser.Id != nil {
+		id = utils.ConvertId(*mygraphqlUser.Id)
 	}
-	return userModel
+	if mygraphqlUser.OrgId != nil {
+		orgId = utils.Int32ToUint(*mygraphqlUser.OrgId)
+	}
+	if mygraphqlUser.Email != nil {
+		email = *mygraphqlUser.Email
+	}
+	if mygraphqlUser.FirstName != nil {
+		firstName = *mygraphqlUser.FirstName
+	}
+	if mygraphqlUser.LastName != nil {
+		lastName = *mygraphqlUser.LastName
+	}
+	if mygraphqlUser.Password != nil {
+		password = *mygraphqlUser.Password
+	}
+	if mygraphqlUser.Token != nil {
+		token = *mygraphqlUser.Token
+	}
+
+	return models.User{
+		Email:     email,
+		FirstName: firstName,
+		Id:        id,
+		LastName:  lastName,
+		OrgId:     orgId,
+		Password:  password,
+		Token:     token,
+	}
 }
 func ReverseMap2User(structUser *user) models.User {
 

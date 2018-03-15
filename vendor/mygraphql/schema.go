@@ -3,7 +3,7 @@ package mygraphql
 var Schema = ` 
  schema {
  	query: Query
- 	# mutation: Mutation
+ 	mutation: Mutation
  }
 
  # The query type, represents all of the entry points into our object graph
@@ -85,11 +85,11 @@ var Schema = `
  }
  input UserInput {
  	id: ID 
- 	first_name: String!
- 	last_name: String!
- 	email: String!
- 	password: String!
- 	token: String!
+ 	first_name: String
+ 	last_name: String
+ 	email: String
+ 	password: String
+ 	token: String
  	org_id: Int 
  	teams: [TeamInput!]
  	team: TeamInput
